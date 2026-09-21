@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="4" y="4" width="56" height="56" rx="8" fill="#0b1020" />
-  <rect x="4.5" y="4.5" width="55" height="55" rx="7.5" fill="none" stroke="#1e293b" />
+  <rect x="4" y="4" width="56" height="56" rx="8" fill="#0E191A" />
+  <rect x="4.5" y="4.5" width="55" height="55" rx="7.5" fill="none" stroke="#645440" />
   <text
     x="11"
     y="44"
-    fill="#67e8f9"
+    fill="#B4BF9C"
     font-family="serif"
     font-size="27"
     font-weight="700"
@@ -15,7 +15,7 @@
   <text
     x="26"
     y="44"
-    fill="#a78bfa"
+    fill="#CBCDA3"
     font-family="serif"
     font-size="27"
     font-weight="700"
@@ -26,7 +26,7 @@
   <text
     x="42"
     y="44"
-    fill="#67e8f9"
+    fill="#B4BF9C"
     font-family="serif"
     font-size="27"
     font-weight="700"
