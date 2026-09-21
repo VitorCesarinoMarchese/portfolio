@@ -1,22 +1,29 @@
 import {
   useCallback,
+  lazy,
+  Suspense,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type UIEvent,
 } from 'react'
 import {
   AddressBook,
+  Clock,
   FilePdf,
   Folders,
+  Lightbulb,
+  Pause,
+  Play,
   Stack,
+  Translate,
   User,
   type IconWeight,
 } from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 import {
   contacts,
+  cvInfo,
   getCvFileUrl,
   getLocalizedText,
   profile,
@@ -25,10 +32,13 @@ import {
   type LocaleCode,
 } from '../data/portfolioContent.ts'
 import { AppWindow, type WindowPosition } from './AppWindow.tsx'
-import { PlasmaWallpaper } from './PlasmaWallpaper.tsx'
+import { WallpaperBoundary } from './WallpaperBoundary.tsx'
+
+const PlasmaWallpaper = lazy(() => import('./PlasmaWallpaper.tsx').then((module) => ({ default: module.PlasmaWallpaper })))
 
 type DesktopAppId = 'projects' | 'about' | 'contact' | 'cv' | 'skills'
 type WindowMode = 'closed' | 'open' | 'minimized'
+type CelestialPhase = 'day' | 'night'
 
 interface DesktopAppDefinition {
   id: DesktopAppId
@@ -42,14 +52,7 @@ interface WindowState {
   restorePosition: WindowPosition | null
 }
 
-interface MobileTapTransition {
-  targetIndex: number
-  direction: -1 | 1
-  lastIndex: number
-}
-
 type WindowStateMap = Record<DesktopAppId, WindowState>
-type WallpaperLoadPhase = 'loading' | 'ready' | 'error'
 
 const ICON_WEIGHT: IconWeight = 'regular'
 
@@ -70,23 +73,24 @@ const INITIAL_WINDOW_POSITIONS: Record<DesktopAppId, WindowPosition> = {
 }
 
 const DESKTOP_MEDIA_QUERY = '(max-width: 900px)'
-const WALLPAPER_LOAD_TIMEOUT_MS = 8_000
-const WALLPAPER_FADE_DURATION_MS = 220
-
-let hasResolvedInitialWallpaperGate = false
-
 const getInitialIsMobile = (): boolean => window.matchMedia(DESKTOP_MEDIA_QUERY).matches
+const getSkyCycle = (date: Date): { phase: CelestialPhase; progress: number } => {
+  const hour = date.getHours() + date.getMinutes() / 60
+  if (hour >= 6 && hour < 18) return { phase: 'day', progress: (hour - 6) / 12 }
+  const nightHour = hour < 6 ? hour + 24 : hour
+  return { phase: 'night', progress: (nightHour - 18) / 12 }
+}
 
 const createInitialWindowState = (): WindowStateMap => ({
   projects: {
-    mode: 'closed',
+    mode: 'open',
     position: { ...INITIAL_WINDOW_POSITIONS.projects },
     zIndex: 31,
     isMaximized: false,
     restorePosition: null,
   },
   about: {
-    mode: 'open',
+    mode: 'closed',
     position: { ...INITIAL_WINDOW_POSITIONS.about },
     zIndex: 32,
     isMaximized: false,
@@ -121,22 +125,6 @@ const resolveLocale = (language: string): LocaleCode =>
 const formatClock = (date: Date): string =>
   new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(date)
 
-const findMobileTabIndex = (appId: DesktopAppId): number =>
-  APP_DEFINITIONS.findIndex((app) => app.id === appId)
-
-const getMobilePageOffsets = (
-  container: HTMLDivElement,
-  pageRefs: Array<HTMLDivElement | null>,
-): number[] =>
-  APP_DEFINITIONS.map((_, index) => pageRefs[index]?.offsetLeft ?? index * container.clientWidth)
-
-const getClosestOffsetIndex = (scrollLeft: number, offsets: number[]): number =>
-  offsets.reduce((bestIndex, offset, index) => {
-    const bestDistance = Math.abs(scrollLeft - offsets[bestIndex])
-    const currentDistance = Math.abs(scrollLeft - offset)
-    return currentDistance < bestDistance ? index : bestIndex
-  }, 0)
-
 function AppIcon({
   appId,
   size,
@@ -170,35 +158,31 @@ interface AppViewProps {
 function ProjectsView({ locale, translate }: AppViewProps) {
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-300">{translate('projects.intro')}</p>
+      <header className="project-intro">
+        <h3>{translate('projects.heading')}</h3>
+        <p>{translate('projects.description')}</p>
+        <p className="desktop-shortcut-hint"><Lightbulb size={18} aria-hidden />{translate('desktop.shortcuts')}</p>
+      </header>
       {projects.map((project) => (
         <article
           key={project.id}
-          className="rounded-xl border border-slate-300/15 bg-slate-900/50 p-4 shadow-[0_14px_36px_rgba(2,6,23,0.45)]"
+          className="project-entry"
         >
-          <h3 className="text-lg text-slate-100">{getLocalizedText(project.title, locale)}</h3>
-          <p className="mt-2 text-sm leading-relaxed text-slate-300">
-            {getLocalizedText(project.description, locale)}
-          </p>
+          <div className="project-copy">
+            <h4 className="project-title">{getLocalizedText(project.title, locale)}</h4>
+            <p className="project-summary">{getLocalizedText(project.description, locale)}</p>
+            <p className="project-detail">{getLocalizedText(project.details, locale)}</p>
+            <ul className="project-stack">
+              {project.stack.map((item) => <li key={item}>{item}</li>)}
+            </ul>
 
-          <ul className="mt-3 flex flex-wrap gap-2 text-xs">
-            {project.stack.map((item) => (
-              <li
-                key={item}
-                className="rounded-full border border-sky-300/35 bg-sky-400/10 px-2 py-1 text-sky-200"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-100">
+            <div className="project-actions">
             {project.liveUrl ? (
               <a
                 href={project.liveUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-lg border border-cyan-300/40 bg-cyan-400/15 px-3 py-1.5 transition hover:bg-cyan-400/30"
+                className="project-primary-link"
               >
                 {translate('projects.demo')}
               </a>
@@ -207,10 +191,11 @@ function ProjectsView({ locale, translate }: AppViewProps) {
               href={project.repoUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border border-indigo-300/40 bg-indigo-400/15 px-3 py-1.5 transition hover:bg-indigo-400/30"
+              className={project.liveUrl ? "project-secondary-link" : "project-primary-link"}
             >
               {translate('projects.source')}
             </a>
+            </div>
           </div>
         </article>
       ))}
@@ -241,7 +226,7 @@ function ContactView({ translate }: AppViewProps) {
       <p className="text-sm text-slate-300">{translate('contact.description')}</p>
 
       <ul className="space-y-3">
-        {contacts.map((contact) => {
+        {contacts.map((contact, index) => {
           const isExternal = contact.href.startsWith('http')
 
           return (
@@ -250,9 +235,11 @@ function ContactView({ translate }: AppViewProps) {
                 href={contact.href}
                 target={isExternal ? '_blank' : undefined}
                 rel={isExternal ? 'noreferrer' : undefined}
-                className="flex items-center justify-between rounded-xl border border-slate-300/20 bg-slate-900/45 px-4 py-3 transition hover:border-sky-300/50 hover:bg-slate-900/75"
+                className="flex flex-wrap items-center justify-between gap-2 break-all rounded-xl border border-slate-300/20 bg-slate-900/45 px-4 py-3 transition hover:border-sky-300/50 hover:bg-slate-900/75"
               >
-                <span className="text-sm tracking-wide text-slate-400">{contact.label}</span>
+                <span className="text-sm tracking-wide text-slate-300">
+                  {contact.label}{index === 0 ? <small>{translate('contact.preferred')}</small> : null}
+                </span>
                 <span className="text-sm text-slate-100">{contact.value}</span>
               </a>
             </li>
@@ -265,6 +252,7 @@ function ContactView({ translate }: AppViewProps) {
 
 function CvView({ locale, translate }: AppViewProps) {
   const [cvFileUrl, setCvFileUrl] = useState(() => getCvFileUrl(locale))
+  const [previewFailed, setPreviewFailed] = useState(false)
 
   useEffect(() => {
     let isActive = true
@@ -305,27 +293,22 @@ function CvView({ locale, translate }: AppViewProps) {
   }, [locale])
 
   return (
-    <section className="flex h-full min-h-[24rem] flex-col gap-3">
+    <section className="cv-content flex min-h-[24rem] flex-col gap-3">
+      <p className="text-sm text-slate-300">{translate('cv.previewFallback')}</p>
+      {previewFailed ? <p role="status" className="cv-preview-error">{translate('cv.previewError')}</p> : null}
+      <p className="text-sm text-slate-300">{translate('cv.updatedLabel')}: {new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${cvInfo.lastUpdated}-01T00:00:00Z`))}</p>
+      <a className="project-primary-link self-start" href={cvFileUrl} target="_blank" rel="noreferrer" download>{translate('cv.download')}</a>
       <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-300/25 bg-slate-950/85">
         <iframe
           title={translate('cv.previewTitle')}
           src={cvFileUrl}
-          className="h-full w-full"
+          className="h-[28rem] w-full"
           loading="lazy"
+          onError={() => setPreviewFailed(true)}
+          onLoad={() => setPreviewFailed(false)}
         />
       </div>
 
-      <footer className="rounded-xl border border-slate-300/25 bg-slate-900/55 p-2">
-        <a
-          href={cvFileUrl}
-          target="_blank"
-          rel="noreferrer"
-          download
-          className="inline-flex w-full justify-center rounded-lg border border-emerald-300/45 bg-emerald-400/20 px-4 py-2 text-sm text-emerald-100 transition hover:bg-emerald-400/30"
-        >
-          {translate('cv.download')}
-        </a>
-      </footer>
     </section>
   )
 }
@@ -363,9 +346,7 @@ function AppContent({
   appId,
   locale,
   translate,
-}: {
-  appId: DesktopAppId
-} & AppViewProps) {
+}: { appId: DesktopAppId } & AppViewProps) {
   switch (appId) {
     case 'projects':
       return <ProjectsView locale={locale} translate={translate} />
@@ -380,130 +361,21 @@ function AppContent({
   }
 }
 
-function MobileTabPage({
-  appId,
-  locale,
-  translate,
-  onToggleLanguage,
-  pageRef,
-}: {
-  appId: DesktopAppId
-  locale: LocaleCode
-  translate: (key: string) => string
-  onToggleLanguage: () => void
-  pageRef: (node: HTMLDivElement | null) => void
-}) {
-  return (
-    <div ref={pageRef} className="h-full w-full flex-none snap-start">
-      <article className="mx-3 mb-1 flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-300/20 bg-slate-950/78 shadow-[0_18px_52px_rgba(2,6,23,0.65)] backdrop-blur-lg">
-        <header className="flex items-center justify-between border-b border-slate-200/20 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <AppIcon appId={appId} size={18} className="text-sky-200" />
-            <h2 className="text-sm tracking-wide text-slate-100">{translate(`apps.${appId}.title`)}</h2>
-          </div>
-          <button
-            type="button"
-            onClick={onToggleLanguage}
-            className="rounded-lg border border-slate-300/30 bg-slate-900/65 px-3 py-1 text-xs text-slate-100 transition hover:bg-slate-800/85"
-          >
-            {locale.toUpperCase()}
-          </button>
-        </header>
-
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <AppContent appId={appId} locale={locale} translate={translate} />
-        </div>
-      </article>
-    </div>
-  )
-}
-
-function LoadingGateOverlay({
-  translate,
-  isFading,
-}: {
-  translate: (key: string) => string
-  isFading: boolean
-}) {
-  return (
-    <div
-      className={`absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-950/95 to-slate-900/95 px-6 transition-opacity duration-200 ${
-        isFading ? 'opacity-0' : 'opacity-100'
-      }`}
-    >
-      <div className="w-full max-w-md rounded-2xl border border-sky-300/35 bg-slate-900/62 px-6 py-5 shadow-[0_0_30px_rgba(56,189,248,0.18),0_24px_56px_rgba(2,6,23,0.78)] backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <span className="h-7 w-7 animate-spin rounded-full border-2 border-sky-200/25 border-t-sky-200" />
-          <p className="text-sm text-slate-100">{translate('loading.message')}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function LoadingGateErrorOverlay({
-  translate,
-  onRetry,
-  onContinueWithoutWallpaper,
-}: {
-  translate: (key: string) => string
-  onRetry: () => void
-  onContinueWithoutWallpaper: () => void
-}) {
-  return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-950/95 to-slate-900/95 px-6">
-      <div className="w-full max-w-md rounded-2xl border border-amber-300/45 bg-slate-900/62 px-6 py-5 shadow-[0_0_28px_rgba(251,191,36,0.12),0_24px_56px_rgba(2,6,23,0.78)] backdrop-blur-xl">
-        <h2 className="text-base text-slate-100">{translate('loading.errorTitle')}</h2>
-        <p className="mt-2 text-sm text-slate-300">{translate('loading.errorDescription')}</p>
-
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onRetry}
-            className="rounded-lg border border-sky-300/55 bg-sky-400/16 px-4 py-2 text-sm text-sky-100 transition hover:bg-sky-400/25"
-          >
-            {translate('loading.retry')}
-          </button>
-          <button
-            type="button"
-            onClick={onContinueWithoutWallpaper}
-            className="rounded-lg border border-slate-200/30 bg-slate-900/70 px-4 py-2 text-sm text-slate-100 transition hover:bg-slate-800/80"
-          >
-            {translate('loading.continueWithoutWallpaper')}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export function DesktopPortfolio() {
   const { t, i18n } = useTranslation()
 
   const [windowState, setWindowState] = useState<WindowStateMap>(createInitialWindowState)
-  const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>('about')
+  const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>('projects')
   const [isMobile, setIsMobile] = useState(getInitialIsMobile)
+  const [skyCycle, setSkyCycle] = useState(() => getSkyCycle(new Date()))
   const [clockLabel, setClockLabel] = useState(() => formatClock(new Date()))
-  const [isInitialWallpaperGateActive, setIsInitialWallpaperGateActive] = useState(
-    () => !hasResolvedInitialWallpaperGate,
-  )
-  const [wallpaperLoadPhase, setWallpaperLoadPhase] = useState<WallpaperLoadPhase>(() =>
-    hasResolvedInitialWallpaperGate ? 'ready' : 'loading',
-  )
   const [isWallpaperEnabled, setIsWallpaperEnabled] = useState(true)
-  const [wallpaperRetryToken, setWallpaperRetryToken] = useState(0)
-  const [isLoadingOverlayVisible, setIsLoadingOverlayVisible] = useState(
-    () => !hasResolvedInitialWallpaperGate,
+  const [wallpaperFailed, setWallpaperFailed] = useState(false)
+  const [isWallpaperAnimated, setIsWallpaperAnimated] = useState(
+    () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
-  const [isLoadingOverlayFading, setIsLoadingOverlayFading] = useState(false)
 
   const zIndexRef = useRef(80)
-  const mobilePagesRef = useRef<HTMLDivElement>(null)
-  const mobilePageRefs = useRef<Array<HTMLDivElement | null>>([])
-  const mobileEntrySyncRef = useRef(false)
-  const mobileTapTransitionRef = useRef<MobileTapTransition | null>(null)
-  const overlayFadeTimeoutRef = useRef<number | null>(null)
-
   const locale = resolveLocale(i18n.language)
 
   const translate = useCallback((key: string): string => t(key) as string, [t])
@@ -524,7 +396,9 @@ export function DesktopPortfolio() {
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
-      setClockLabel(formatClock(new Date()))
+      const now = new Date()
+      setClockLabel(formatClock(now))
+      setSkyCycle(getSkyCycle(now))
     }, 30_000)
 
     return () => {
@@ -533,95 +407,16 @@ export function DesktopPortfolio() {
   }, [])
 
   useEffect(() => {
-    return () => {
-      if (overlayFadeTimeoutRef.current !== null) {
-        window.clearTimeout(overlayFadeTimeoutRef.current)
-      }
-    }
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const handleChange = (event: MediaQueryListEvent) => setIsWallpaperAnimated(!event.matches)
+    preference.addEventListener('change', handleChange)
+    return () => preference.removeEventListener('change', handleChange)
   }, [])
-
-  const resolveInitialWallpaperGate = useCallback(() => {
-    if (hasResolvedInitialWallpaperGate) {
-      return
-    }
-
-    hasResolvedInitialWallpaperGate = true
-    setIsInitialWallpaperGateActive(false)
-  }, [])
-
-  useEffect(() => {
-    if (!isInitialWallpaperGateActive || wallpaperLoadPhase !== 'loading' || !isWallpaperEnabled) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setWallpaperLoadPhase('error')
-      setIsLoadingOverlayVisible(true)
-      setIsLoadingOverlayFading(false)
-    }, WALLPAPER_LOAD_TIMEOUT_MS)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [isInitialWallpaperGateActive, isWallpaperEnabled, wallpaperLoadPhase])
-
-  const startOverlayFadeOut = useCallback(() => {
-    if (overlayFadeTimeoutRef.current !== null) {
-      window.clearTimeout(overlayFadeTimeoutRef.current)
-    }
-
-    setIsLoadingOverlayFading(true)
-    overlayFadeTimeoutRef.current = window.setTimeout(() => {
-      setIsLoadingOverlayVisible(false)
-      setIsLoadingOverlayFading(false)
-      overlayFadeTimeoutRef.current = null
-    }, WALLPAPER_FADE_DURATION_MS)
-  }, [])
-
-  const handleWallpaperReady = useCallback(() => {
-    setWallpaperLoadPhase('ready')
-    if (hasResolvedInitialWallpaperGate) {
-      return
-    }
-
-    setIsLoadingOverlayVisible(true)
-    setIsLoadingOverlayFading(false)
-    resolveInitialWallpaperGate()
-    startOverlayFadeOut()
-  }, [resolveInitialWallpaperGate, startOverlayFadeOut])
 
   const handleWallpaperError = useCallback(() => {
-    if (hasResolvedInitialWallpaperGate) {
-      setIsWallpaperEnabled(false)
-      return
-    }
-
-    setWallpaperLoadPhase('error')
-    setIsLoadingOverlayVisible(true)
-    setIsLoadingOverlayFading(false)
-  }, [])
-
-  const retryWallpaperLoad = useCallback(() => {
-    if (overlayFadeTimeoutRef.current !== null) {
-      window.clearTimeout(overlayFadeTimeoutRef.current)
-      overlayFadeTimeoutRef.current = null
-    }
-
-    setIsWallpaperEnabled(true)
-    setWallpaperLoadPhase('loading')
-    setWallpaperRetryToken((current) => current + 1)
-    setIsLoadingOverlayVisible(true)
-    setIsLoadingOverlayFading(false)
-  }, [])
-
-  const continueWithoutWallpaper = useCallback(() => {
     setIsWallpaperEnabled(false)
-    setWallpaperLoadPhase('ready')
-    setIsLoadingOverlayVisible(true)
-    setIsLoadingOverlayFading(false)
-    resolveInitialWallpaperGate()
-    startOverlayFadeOut()
-  }, [resolveInitialWallpaperGate, startOverlayFadeOut])
+    setWallpaperFailed(true)
+  }, [])
 
   const activeDesktopApp = useMemo<DesktopAppId | null>(() => {
     const openApps = APP_DEFINITIONS
@@ -650,6 +445,26 @@ export function DesktopPortfolio() {
       },
     }))
   }, [])
+
+  const navigateToApp = useCallback((appId: DesktopAppId) => {
+    if (isMobile) {
+      setActiveMobileTab(appId)
+      return
+    }
+    focusDesktopApp(appId)
+  }, [focusDesktopApp, isMobile])
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+      const app = APP_DEFINITIONS[Number(event.key) - 1]
+      if (!app) return
+      event.preventDefault()
+      navigateToApp(app.id)
+    }
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  }, [navigateToApp])
 
   const closeDesktopApp = useCallback((appId: DesktopAppId) => {
     setWindowState((current) => {
@@ -734,14 +549,14 @@ export function DesktopPortfolio() {
     (appId: DesktopAppId) => {
       const mode = windowState[appId].mode
 
-      if (mode === 'open') {
+      if (mode === 'open' && activeDesktopApp === appId) {
         minimizeDesktopApp(appId)
         return
       }
 
       focusDesktopApp(appId)
     },
-    [focusDesktopApp, minimizeDesktopApp, windowState],
+    [activeDesktopApp, focusDesktopApp, minimizeDesktopApp, windowState],
   )
 
   const toggleLanguage = useCallback(() => {
@@ -749,231 +564,88 @@ export function DesktopPortfolio() {
     void i18n.changeLanguage(nextLanguage)
   }, [i18n, locale])
 
-  const scrollMobileToTab = useCallback((appId: DesktopAppId, behavior: ScrollBehavior = 'smooth') => {
-    const container = mobilePagesRef.current
-    if (!container) {
-      return
-    }
-
-    const offsets = getMobilePageOffsets(container, mobilePageRefs.current)
-    const targetIndex = findMobileTabIndex(appId)
-
-    container.scrollTo({
-      left: offsets[targetIndex] ?? targetIndex * container.clientWidth,
-      behavior,
-    })
-  }, [])
-
-  const handleMobileTabSelect = useCallback(
-    (appId: DesktopAppId) => {
-      const container = mobilePagesRef.current
-      if (!container) {
-        return
-      }
-
-      const offsets = getMobilePageOffsets(container, mobilePageRefs.current)
-      const sourceIndex = getClosestOffsetIndex(container.scrollLeft, offsets)
-      const targetIndex = findMobileTabIndex(appId)
-      const sourceTab = APP_DEFINITIONS[sourceIndex]?.id
-
-      if (sourceTab) {
-        setActiveMobileTab((current) => (current === sourceTab ? current : sourceTab))
-      }
-
-      if (targetIndex === sourceIndex) {
-        mobileTapTransitionRef.current = null
-        return
-      }
-
-      mobileTapTransitionRef.current = {
-        targetIndex,
-        direction: targetIndex > sourceIndex ? 1 : -1,
-        lastIndex: sourceIndex,
-      }
-
-      container.scrollTo({
-        left: offsets[targetIndex] ?? targetIndex * container.clientWidth,
-        behavior: 'smooth',
-      })
-    },
-    [],
+  const languageSwitchLabel = translate(
+    locale === 'en' ? 'desktop.switchToPortuguese' : 'desktop.switchToEnglish',
   )
-
-  const handleMobileScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
-    const container = event.currentTarget
-    const offsets = getMobilePageOffsets(container, mobilePageRefs.current)
-    const rawIndex = getClosestOffsetIndex(container.scrollLeft, offsets)
-    let nextIndex = rawIndex
-
-    const tapTransition = mobileTapTransitionRef.current
-    if (tapTransition) {
-      if (tapTransition.direction === 1) {
-        nextIndex = Math.max(tapTransition.lastIndex, Math.min(rawIndex, tapTransition.targetIndex))
-      } else {
-        nextIndex = Math.min(tapTransition.lastIndex, Math.max(rawIndex, tapTransition.targetIndex))
-      }
-
-      tapTransition.lastIndex = nextIndex
-
-      const targetOffset = offsets[tapTransition.targetIndex]
-      const reachedTarget = Math.abs(container.scrollLeft - targetOffset) < 1.5
-      if (reachedTarget && nextIndex === tapTransition.targetIndex) {
-        mobileTapTransitionRef.current = null
-      }
-    }
-
-    const nextTab = APP_DEFINITIONS[nextIndex]?.id
-
-    if (nextTab) {
-      setActiveMobileTab((current) => (current === nextTab ? current : nextTab))
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!isMobile) {
-      mobileEntrySyncRef.current = false
-      return
-    }
-
-    if (mobileEntrySyncRef.current) {
-      return
-    }
-
-    scrollMobileToTab(activeMobileTab, 'auto')
-    mobileEntrySyncRef.current = true
-  }, [activeMobileTab, isMobile, scrollMobileToTab])
-
-  const showLoadingOverlay = isLoadingOverlayVisible && wallpaperLoadPhase === 'loading'
-  const showErrorOverlay = isLoadingOverlayVisible && wallpaperLoadPhase === 'error'
-  const showPortfolioInterface = !isInitialWallpaperGateActive || wallpaperLoadPhase === 'ready'
-
+  const languageSwitchText = locale === 'en' ? 'Português' : 'English'
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950">
+    <div className="portfolio-shell relative h-dvh overflow-hidden" data-sky-phase={skyCycle.phase}>
       {isWallpaperEnabled ? (
-        <PlasmaWallpaper
-          key={wallpaperRetryToken}
-          onReady={handleWallpaperReady}
-          onError={handleWallpaperError}
-        />
+        <WallpaperBoundary onError={handleWallpaperError}>
+          <Suspense fallback={null}>
+            <PlasmaWallpaper
+              animated={isWallpaperAnimated}
+              phase={skyCycle.phase}
+              cycleProgress={skyCycle.progress}
+              onError={handleWallpaperError}
+            />
+          </Suspense>
+        </WallpaperBoundary>
       ) : null}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-transparent to-slate-950/80" />
+      <div className="wallpaper-overlay absolute inset-0" />
 
-      {showLoadingOverlay ? (
-        <LoadingGateOverlay translate={translate} isFading={isLoadingOverlayFading} />
-      ) : null}
-      {showErrorOverlay ? (
-        <LoadingGateErrorOverlay
-          translate={translate}
-          onRetry={retryWallpaperLoad}
-          onContinueWithoutWallpaper={continueWithoutWallpaper}
-        />
+      {wallpaperFailed ? (
+        <div className="wallpaper-status" role="status">
+          <span>{translate('desktop.wallpaperUnavailable')}</span>
+          <button type="button" onClick={() => setWallpaperFailed(false)}>{translate('desktop.dismiss')}</button>
+        </div>
       ) : null}
 
-      {showPortfolioInterface ? (
-        <div className="relative z-10 min-h-screen">
+      <main className="relative z-10 h-full">
           {isMobile ? (
           <>
-            <header className="absolute inset-x-0 top-0 z-50 flex justify-center px-4 pt-2">
-              <span className="rounded-full border border-slate-200/25 bg-slate-900/70 px-4 py-1 text-xs tracking-[0.2em] text-slate-100">
-                {clockLabel}
-              </span>
+            <header className="mobile-header">
+              <div><h1>{profile.name}</h1><span>{getLocalizedText(profile.role, locale)}</span></div>
+              <div className="mobile-utilities">
+                <button type="button" onClick={toggleLanguage} aria-label={languageSwitchLabel} title={languageSwitchLabel}>{languageSwitchText}</button>
+              </div>
             </header>
-
-            <section className="absolute inset-x-0 bottom-24 top-12 md:hidden">
-              <div
-                ref={mobilePagesRef}
-                onScroll={handleMobileScroll}
-                className="flex h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {APP_DEFINITIONS.map((app, index) => (
-                  <MobileTabPage
-                    key={app.id}
-                    appId={app.id}
-                    locale={locale}
-                    translate={translate}
-                    onToggleLanguage={toggleLanguage}
-                    pageRef={(node) => {
-                      mobilePageRefs.current[index] = node
-                    }}
-                  />
-                ))}
-              </div>
+            <section key={activeMobileTab} className="mobile-content" id="mobile-content" aria-label={translate(`apps.${activeMobileTab}.title`)}>
+              <h2 className="mobile-section-title">{translate(`apps.${activeMobileTab}.title`)}</h2>
+              <AppContent key={activeMobileTab} appId={activeMobileTab} locale={locale} translate={translate} />
             </section>
-
-            <nav className="absolute inset-x-0 bottom-3 z-50 px-4" aria-label={translate('panel.dock')}>
-              <div className="mx-auto flex max-w-sm items-center justify-center gap-2 rounded-2xl border border-slate-200/25 bg-slate-950/68 p-2 shadow-[0_18px_50px_rgba(2,6,23,0.65)] backdrop-blur-xl">
-                {APP_DEFINITIONS.map((app) => {
-                  const isActive = activeMobileTab === app.id
-
-                  return (
-                    <button
-                      key={app.id}
-                      type="button"
-                      onClick={() => handleMobileTabSelect(app.id)}
-                      aria-label={translate(`apps.${app.id}.title`)}
-                      className={`rounded-xl p-2 transition ${
-                        isActive
-                          ? 'border border-sky-300/70 bg-sky-400/20 text-sky-50'
-                          : 'border border-slate-300/25 bg-slate-900/45 text-slate-200 hover:border-slate-100/45'
-                      }`}
-                    >
-                      <AppIcon appId={app.id} size={20} className="text-current" />
-                    </button>
-                  )
-                })}
-              </div>
+            <nav className="mobile-dock" aria-label={translate('panel.dock')}>
+              {APP_DEFINITIONS.map((app, index) => (
+                <button key={app.id} type="button" onClick={() => setActiveMobileTab(app.id)}
+                  aria-current={activeMobileTab === app.id ? 'page' : undefined}
+                  aria-controls="mobile-content"
+                  title={`${translate(`apps.${app.id}.title`)} (Alt+${index + 1})`}>
+                  <AppIcon appId={app.id} size={20} />
+                  <span>{translate(`apps.${app.id}.title`)}</span>
+                </button>
+              ))}
             </nav>
           </>
           ) : (
           <>
-            <header className="absolute inset-x-0 top-0 z-50 flex items-center justify-between border-b border-slate-200/20 bg-slate-950/55 px-4 py-3 backdrop-blur-md md:px-6">
+            <header className="desktop-topbar absolute inset-x-0 top-0 z-50 flex items-center justify-between px-4 py-3 backdrop-blur-md md:px-6">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-sky-200/85">{profile.name}</p>
+                <h1 className="text-sm uppercase tracking-[0.3em] text-sky-200/85">{profile.name}</h1>
                 <p className="text-xs text-slate-300">{translate('desktop.environment')}</p>
               </div>
 
-              <div className="flex items-center gap-2 md:gap-3">
+              <div className="desktop-utilities flex items-center gap-2 md:gap-3">
+                <button type="button" className="utility-control" aria-pressed={isWallpaperAnimated}
+                  onClick={() => setIsWallpaperAnimated((current) => !current)}>
+                  {isWallpaperAnimated ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}
+                  {translate(isWallpaperAnimated ? 'desktop.motionOff' : 'desktop.motion')}
+                </button>
                 <button
                   type="button"
                   onClick={toggleLanguage}
-                  className="rounded-lg border border-slate-300/30 bg-slate-900/65 px-3 py-1.5 text-xs text-slate-100 transition hover:bg-slate-800/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200"
+                  className="utility-control"
                 >
-                  {translate('desktop.language')}: {locale.toUpperCase()}
+                  <Translate size={16} aria-hidden />
+                  {languageSwitchLabel}
                 </button>
 
-                <span className="rounded-lg border border-slate-300/25 bg-slate-900/65 px-3 py-1.5 text-xs text-slate-200">
-                  {translate('desktop.clock')}: {clockLabel}
-                </span>
+                <div className="clock-display" aria-label={`${translate('desktop.clock')}: ${clockLabel}`}>
+                  <Clock size={16} aria-hidden />
+                  <span>{translate('desktop.clock')}</span>
+                  <time>{clockLabel}</time>
+                </div>
               </div>
             </header>
-
-            <div className="absolute left-4 top-24 hidden w-24 gap-3 md:grid">
-              {APP_DEFINITIONS.map((app) => {
-                const mode = windowState[app.id].mode
-                const highlighted = mode !== 'closed'
-
-                return (
-                  <button
-                    key={app.id}
-                    type="button"
-                    onClick={() => focusDesktopApp(app.id)}
-                    className={`group flex flex-col items-center gap-1 rounded-xl p-2 text-center transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300 ${
-                      highlighted
-                        ? 'border border-sky-300/50 bg-slate-900/60'
-                        : 'border border-transparent bg-slate-900/25 hover:border-slate-200/30 hover:bg-slate-900/55'
-                    }`}
-                    aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
-                  >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200/20 bg-slate-900/70 text-slate-100 group-hover:border-sky-300/60">
-                      <AppIcon appId={app.id} size={22} />
-                    </span>
-                    <span className="line-clamp-2 text-xs text-slate-200">
-                      {translate(`apps.${app.id}.title`)}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
 
             {APP_DEFINITIONS.map((app) => {
               const currentWindow = windowState[app.id]
@@ -986,6 +658,7 @@ export function DesktopPortfolio() {
                 <AppWindow
                   key={app.id}
                   title={translate(`apps.${app.id}.title`)}
+                  dragLabel={translate("desktop.dragHint")}
                   closeLabel={translate('desktop.close')}
                   minimizeLabel={translate('desktop.minimize')}
                   maximizeLabel={translate('desktop.maximize')}
@@ -1006,8 +679,8 @@ export function DesktopPortfolio() {
             })}
 
             <nav className="absolute inset-x-0 bottom-3 z-50 px-3 md:px-4" aria-label={translate('panel.dock')}>
-              <div className="mx-auto flex w-full max-w-xl items-center justify-center gap-2 rounded-2xl border border-slate-200/25 bg-slate-950/60 p-2 shadow-[0_20px_50px_rgba(2,6,23,0.65)] backdrop-blur-xl">
-                {APP_DEFINITIONS.map((app) => {
+              <div className="desktop-dock mx-auto flex w-full max-w-xl items-center justify-center gap-2 rounded-2xl p-2 backdrop-blur-xl">
+                {APP_DEFINITIONS.map((app, index) => {
                   const mode = windowState[app.id].mode
                   const isActive = activeDesktopApp === app.id
 
@@ -1032,10 +705,15 @@ export function DesktopPortfolio() {
                       key={app.id}
                       type="button"
                       onClick={() => handleTrayClick(app.id)}
-                      aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
+                      aria-label={`${translate(isActive ? 'desktop.minimize' : 'desktop.open')} ${translate(`apps.${app.id}.title`)}`}
+                      title={`${translate(`apps.${app.id}.title`)} (Alt+${index + 1})`}
+                      aria-pressed={isActive}
+                      data-mode={mode}
                       className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-3 py-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200 ${buttonClass}`}
                     >
                       <AppIcon appId={app.id} size={18} className="text-current" />
+                      <span className="text-xs">{translate(`apps.${app.id}.title`)}</span>
+                      <kbd aria-hidden="true">Alt+{index + 1}</kbd>
                       <span className={`mt-1 h-1.5 w-1.5 rounded-full ${dotClass}`} />
                     </button>
                   )
@@ -1044,8 +722,7 @@ export function DesktopPortfolio() {
             </nav>
           </>
           )}
-        </div>
-      ) : null}
+      </main>
     </div>
   )
 }

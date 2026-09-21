@@ -9,6 +9,7 @@ export interface PortfolioProject {
   id: string
   title: LocalizedText
   description: LocalizedText
+  details: LocalizedText
   stack: string[]
   liveUrl?: string
   repoUrl: string
@@ -36,11 +37,11 @@ export const profile = {
   bio: [
     {
       en: 'I design and build modern web products with strong user experience and maintainable architecture.',
-      pt: 'Eu projeto e desenvolvo produtos web modernos com forte foco em experiencia de usuario e arquitetura sustentavel.',
+      pt: 'Eu projeto e desenvolvo produtos web modernos com foco na experiência do usuário e em uma arquitetura de fácil manutenção.',
     },
     {
-      en: 'This portfolio is intentionally built as a KDE Plasma inspired desktop to showcase engineering, visual design, and interaction systems together.',
-      pt: 'Este portfolio foi criado como um desktop inspirado no KDE Plasma para demonstrar engenharia, design visual e sistemas de interacao no mesmo produto.',
+      en: 'This portfolio brings engineering, visual design, and interaction together in a desktop inspired by KDE Plasma.',
+      pt: 'Este portfólio reúne engenharia, design visual e interação em um desktop inspirado no KDE Plasma.',
     },
   ] satisfies LocalizedText[],
 }
@@ -49,14 +50,18 @@ export const projects: PortfolioProject[] = [
   {
     id: 'Exchange_of_Currencies',
     title: {
-      en: 'A exchange of currencies',
-      pt: 'Um câmbio de moedas',
+      en: 'Currency Exchange',
+      pt: 'Câmbio de moedas',
     },
     description: {
       en: 'Currency exchange app with USD/GBP wallets, live rates, and transaction history.',
       pt: 'App de câmbio com carteiras em USD/GBP, taxas em tempo real e histórico de transações.',
     },
     stack: ['Next', 'TypeScript', 'Tailwind', 'Node.js'],
+    details: {
+      en: 'Account registration and login connect each user to their wallets. Transaction history keeps past exchanges and balances available to review.',
+      pt: 'Cadastro e login conectam cada usuário às suas carteiras. O histórico permite consultar câmbios anteriores e saldos.',
+    },
     repoUrl: 'https://github.com/VitorCesarinoMarchese/Exchange_of_Currencies',
   },
   {
@@ -66,23 +71,31 @@ export const projects: PortfolioProject[] = [
       pt: 'Chat Terminal',
     },
     description: {
-      en: 'A chat application for the terminal, using Go for the TUI and typescript for the backend.',
-      pt: 'Uma aplicação de chat para o terminal, usando Go para a TUI e TypeScript para o backend.',
+      en: 'A terminal chat app with a Go interface and a TypeScript backend.',
+      pt: 'Uma aplicação de chat no terminal com interface em Go e backend em TypeScript.',
     },
     stack: ['Go', 'TypeScript', 'Redis', 'SQL'],
+    details: {
+      en: 'A Go terminal client connects to a TypeScript API. WebSockets deliver messages in real time, with authentication, friend requests, and persistent chat history.',
+      pt: 'Um cliente de terminal em Go se conecta a uma API TypeScript. WebSockets entregam mensagens em tempo real, com autenticação, pedidos de amizade e histórico persistente.',
+    },
     repoUrl: 'https://github.com/VitorCesarinoMarchese/chat-terminal',
   },
   {
     id: 'portfolio',
     title: {
       en: 'Portfolio',
-      pt: 'Portfolio',
+      pt: 'Portfólio',
     },
     description: {
-      en: 'Portfolio inspired by KDE Plasma desktop enviroment',
-      pt: 'Portfólio inspirado no ambiente de desktop KDE Plasma',
+      en: 'A portfolio inspired by the KDE Plasma desktop environment.',
+      pt: 'Um portfólio inspirado no ambiente de desktop KDE Plasma.',
     },
     stack: ['React', 'TypeScript', 'Tailwind CSS', 'Three.js'],
+    details: {
+      en: 'Movable windows on desktop, labeled navigation on mobile, and content in English and Portuguese. The Three.js forest loads independently of the work.',
+      pt: 'Janelas móveis no desktop, navegação com rótulos no celular e conteúdo em inglês e português. A floresta em Three.js carrega de forma independente dos projetos.',
+    },
     liveUrl: 'https://www.vitorcesarinomarchese.site/',
     repoUrl: 'https://github.com/VitorCesarinoMarchese/portfolio',
   },
