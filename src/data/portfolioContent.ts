@@ -213,7 +213,7 @@ export const cvInfo = {
     en: '/cv-en.pdf',
     pt: '/cv-pt.pdf',
   } satisfies Record<LocaleCode, string>,
-  lastUpdated: '2026-04',
+  lastUpdated: '2026-10',
 }
 
 export const getCvFileUrl = (locale: LocaleCode): string => cvInfo.files[locale] ?? cvInfo.files.en
