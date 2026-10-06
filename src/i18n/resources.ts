@@ -15,7 +15,7 @@ export const resources = {
         motionOff: 'Pause animation',
         switchToEnglish: 'Switch to English',
         switchToPortuguese: 'Switch to Portuguese',
-        shortcuts: 'Alt+1 Projects · Alt+2 About · Alt+3 Skills · Alt+4 Contact · Alt+5 CV. Restore a window to move it by its title bar.',
+        shortcuts: 'Alt+1 About · Alt+2 Experience · Alt+3 Projects · Alt+4 Skills · Alt+5 Contact · Alt+6 CV. Restore a window to move it by its title bar.',
         wallpaperUnavailable: 'The 3D background is unavailable. All portfolio content remains accessible.',
         dismiss: 'Dismiss',
       },
@@ -36,6 +36,7 @@ export const resources = {
         continueWithoutWallpaper: 'Continue without wallpaper',
       },
       apps: {
+        experience: { title: 'Experience' },
         projects: {
           title: 'Projects',
         },
@@ -61,6 +62,7 @@ export const resources = {
       about: {
         heading: 'About me',
       },
+      experience: { heading: 'Professional experience' },
       contact: {
         heading: 'Contact',
         description: 'For professional opportunities, email is the fastest way to reach me. GitHub and LinkedIn have more of my work and background.',
@@ -76,8 +78,8 @@ export const resources = {
         download: 'Download CV',
       },
       skills: {
-        heading: 'Skills snapshot',
-        description: 'Core technologies grouped by area.',
+        heading: 'Skills & Interests',
+        description: 'Technologies I work with and the problems I want to explore.',
       },
     },
   },
@@ -97,7 +99,7 @@ export const resources = {
         motionOff: 'Pausar animação',
         switchToEnglish: 'Mudar para inglês',
         switchToPortuguese: 'Mudar para português',
-        shortcuts: 'Alt+1 Projetos · Alt+2 Sobre · Alt+3 Habilidades · Alt+4 Contato · Alt+5 CV. Restaure uma janela para movê-la pela barra de título.',
+        shortcuts: 'Alt+1 Sobre · Alt+2 Experiência · Alt+3 Projetos · Alt+4 Habilidades · Alt+5 Contato · Alt+6 CV. Restaure uma janela para movê-la pela barra de título.',
         wallpaperUnavailable: 'O fundo 3D não está disponível. Todo o conteúdo do portfólio continua acessível.',
         dismiss: 'Fechar aviso',
       },
@@ -118,6 +120,7 @@ export const resources = {
         continueWithoutWallpaper: 'Continuar sem papel de parede',
       },
       apps: {
+        experience: { title: 'Experiência' },
         projects: {
           title: 'Projetos',
         },
@@ -143,6 +146,7 @@ export const resources = {
       about: {
         heading: 'Sobre mim',
       },
+      experience: { heading: 'Experiência profissional' },
       contact: {
         heading: 'Contato',
         description: 'Para oportunidades profissionais, o email é a forma mais rápida de falar comigo. GitHub e LinkedIn mostram mais do meu trabalho e da minha experiência.',
@@ -159,8 +163,8 @@ export const resources = {
         download: 'Baixar CV',
       },
       skills: {
-        heading: 'Resumo de habilidades',
-        description: 'Tecnologias principais agrupadas por área.',
+        heading: 'Habilidades e interesses',
+        description: 'Tecnologias com que trabalho e os problemas que quero explorar.',
       },
     },
   },
