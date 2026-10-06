@@ -9,6 +9,7 @@ import {
 } from 'react'
 import {
   AddressBook,
+  Briefcase,
   Clock,
   FilePdf,
   Folders,
@@ -27,6 +28,7 @@ import {
   getCvFileUrl,
   getLocalizedText,
   profile,
+  professionalExperience,
   projects,
   skillGroups,
   type LocaleCode,
@@ -36,7 +38,7 @@ import { WallpaperBoundary } from './WallpaperBoundary.tsx'
 
 const PlasmaWallpaper = lazy(() => import('./PlasmaWallpaper.tsx').then((module) => ({ default: module.PlasmaWallpaper })))
 
-type DesktopAppId = 'projects' | 'about' | 'contact' | 'cv' | 'skills'
+type DesktopAppId = 'projects' | 'about' | 'experience' | 'contact' | 'cv' | 'skills'
 type WindowMode = 'closed' | 'open' | 'minimized'
 type CelestialPhase = 'day' | 'night'
 
@@ -57,8 +59,9 @@ type WindowStateMap = Record<DesktopAppId, WindowState>
 const ICON_WEIGHT: IconWeight = 'regular'
 
 const APP_DEFINITIONS: DesktopAppDefinition[] = [
-  { id: 'projects' },
   { id: 'about' },
+  { id: 'experience' },
+  { id: 'projects' },
   { id: 'skills' },
   { id: 'contact' },
   { id: 'cv' },
@@ -70,6 +73,7 @@ const INITIAL_WINDOW_POSITIONS: Record<DesktopAppId, WindowPosition> = {
   contact: { x: 340, y: 168 },
   cv: { x: 290, y: 92 },
   skills: { x: 420, y: 114 },
+  experience: { x: 210, y: 110 },
 }
 
 const DESKTOP_MEDIA_QUERY = '(max-width: 900px)'
@@ -83,14 +87,14 @@ const getSkyCycle = (date: Date): { phase: CelestialPhase; progress: number } =>
 
 const createInitialWindowState = (): WindowStateMap => ({
   projects: {
-    mode: 'open',
+    mode: 'closed',
     position: { ...INITIAL_WINDOW_POSITIONS.projects },
     zIndex: 31,
     isMaximized: false,
     restorePosition: null,
   },
   about: {
-    mode: 'closed',
+    mode: 'open',
     position: { ...INITIAL_WINDOW_POSITIONS.about },
     zIndex: 32,
     isMaximized: false,
@@ -114,6 +118,13 @@ const createInitialWindowState = (): WindowStateMap => ({
     mode: 'closed',
     position: { ...INITIAL_WINDOW_POSITIONS.skills },
     zIndex: 35,
+    isMaximized: false,
+    restorePosition: null,
+  },
+  experience: {
+    mode: 'closed',
+    position: { ...INITIAL_WINDOW_POSITIONS.experience },
+    zIndex: 36,
     isMaximized: false,
     restorePosition: null,
   },
@@ -141,6 +152,8 @@ function AppIcon({
       return <Folders {...sharedProps} />
     case 'about':
       return <User {...sharedProps} />
+    case 'experience':
+      return <Briefcase {...sharedProps} />
     case 'skills':
       return <Stack {...sharedProps} />
     case 'contact':
@@ -219,6 +232,31 @@ function AboutView({ locale, translate }: AppViewProps) {
   )
 }
 
+function ExperienceView({ locale, translate }: AppViewProps) {
+  return (
+      <section className="experience-view" aria-labelledby="experience-heading">
+        <h3 id="experience-heading">{translate('experience.heading')}</h3>
+        {professionalExperience.map((experience) => (
+          <article className="experience-entry" key={experience.id}>
+            <h4>{getLocalizedText(experience.role, locale)}</h4>
+            <p className="experience-meta">
+              <span>{experience.company}</span>
+              <span>{getLocalizedText(experience.period, locale)}</span>
+            </p>
+            <ul className="experience-highlights">
+              {experience.highlights.map((highlight) => (
+                <li key={highlight.en}>{getLocalizedText(highlight, locale)}</li>
+              ))}
+            </ul>
+            <ul className="project-stack">
+              {experience.stack.map((technology) => <li key={technology}>{technology}</li>)}
+            </ul>
+          </article>
+        ))}
+      </section>
+  )
+}
+
 function ContactView({ translate }: AppViewProps) {
   return (
     <section className="space-y-4">
@@ -237,8 +275,9 @@ function ContactView({ translate }: AppViewProps) {
                 rel={isExternal ? 'noreferrer' : undefined}
                 className="flex flex-wrap items-center justify-between gap-2 break-all rounded-xl border border-slate-300/20 bg-slate-900/45 px-4 py-3 transition hover:border-sky-300/50 hover:bg-slate-900/75"
               >
-                <span className="text-sm tracking-wide text-slate-300">
-                  {contact.label}{index === 0 ? <small>{translate('contact.preferred')}</small> : null}
+                <span className="flex flex-wrap items-center gap-2 text-sm tracking-wide text-slate-300">
+                  <span>{contact.label}</span>
+                  {index === 0 ? <span className="contact-preferred">{translate('contact.preferred')}</span> : null}
                 </span>
                 <span className="text-sm text-slate-100">{contact.value}</span>
               </a>
@@ -321,20 +360,11 @@ function SkillsView({ locale, translate }: AppViewProps) {
 
       <div className="space-y-4">
         {skillGroups.map((group) => (
-          <article key={group.id} className="rounded-xl border border-slate-300/20 bg-slate-900/45 p-4">
-            <h4 className="text-sm uppercase tracking-[0.2em] text-sky-200">
+          <article key={group.id} className="skill-group">
+            <h4>
               {getLocalizedText(group.title, locale)}
             </h4>
-            <ul className="mt-3 flex flex-wrap gap-2">
-              {group.items.map((item) => (
-                <li
-                  key={item}
-                  className="rounded-full border border-violet-300/30 bg-violet-400/12 px-2 py-1 text-xs text-violet-100"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <p>{group.items.map((item) => getLocalizedText(item, locale)).join(' · ')}</p>
           </article>
         ))}
       </div>
@@ -352,6 +382,8 @@ function AppContent({
       return <ProjectsView locale={locale} translate={translate} />
     case 'about':
       return <AboutView locale={locale} translate={translate} />
+    case 'experience':
+      return <ExperienceView locale={locale} translate={translate} />
     case 'contact':
       return <ContactView locale={locale} translate={translate} />
     case 'cv':
@@ -365,7 +397,7 @@ export function DesktopPortfolio() {
   const { t, i18n } = useTranslation()
 
   const [windowState, setWindowState] = useState<WindowStateMap>(createInitialWindowState)
-  const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>('projects')
+  const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>('about')
   const [isMobile, setIsMobile] = useState(getInitialIsMobile)
   const [skyCycle, setSkyCycle] = useState(() => getSkyCycle(new Date()))
   const [clockLabel, setClockLabel] = useState(() => formatClock(new Date()))
@@ -679,7 +711,7 @@ export function DesktopPortfolio() {
             })}
 
             <nav className="absolute inset-x-0 bottom-3 z-50 px-3 md:px-4" aria-label={translate('panel.dock')}>
-              <div className="desktop-dock mx-auto flex w-full max-w-xl items-center justify-center gap-2 rounded-2xl p-2 backdrop-blur-xl">
+              <div className="desktop-dock mx-auto grid w-full max-w-xl grid-cols-6 items-stretch gap-2 rounded-2xl p-2 backdrop-blur-xl">
                 {APP_DEFINITIONS.map((app, index) => {
                   const mode = windowState[app.id].mode
                   const isActive = activeDesktopApp === app.id
@@ -709,7 +741,7 @@ export function DesktopPortfolio() {
                       title={`${translate(`apps.${app.id}.title`)} (Alt+${index + 1})`}
                       aria-pressed={isActive}
                       data-mode={mode}
-                      className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-3 py-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200 ${buttonClass}`}
+                      className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200 ${buttonClass}`}
                     >
                       <AppIcon appId={app.id} size={18} className="text-current" />
                       <span className="text-xs">{translate(`apps.${app.id}.title`)}</span>
