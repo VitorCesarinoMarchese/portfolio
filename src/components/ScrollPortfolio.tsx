@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { contacts, getCvFileUrl, getLocalizedText, profile, type LocaleCode } from '../data/portfolioContent.ts'
 import { ContactView, ExperienceView, SkillsView } from './PortfolioViews.tsx'
 import { ProjectGallery } from './ProjectGallery.tsx'
+import { useProjectFocus } from '../hooks/useProjectFocus.ts'
 
 export function ScrollPortfolio() {
   const { t, i18n } = useTranslation()
   const locale: LocaleCode = i18n.language.startsWith('pt') ? 'pt' : 'en'
   const translate = (key: string): string => t(key)
-  const focus = new URLSearchParams(window.location.search).get('focus') === 'systems' ? 'systems' : 'web'
+  const focus = useProjectFocus()
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       document.getElementById(window.location.hash.slice(1))?.scrollIntoView()

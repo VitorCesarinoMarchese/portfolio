@@ -29,6 +29,7 @@ import {
 import { AboutView, ContactView, CvView, ExperienceView, ProjectsView, SkillsView, type AppViewProps } from './PortfolioViews.tsx'
 import { AppWindow, type WindowPosition } from './AppWindow.tsx'
 import { WallpaperBoundary } from './WallpaperBoundary.tsx'
+import { useProjectFocus } from '../hooks/useProjectFocus.ts'
 
 const PlasmaWallpaper = lazy(() => import('./PlasmaWallpaper.tsx').then((module) => ({ default: module.PlasmaWallpaper })))
 
@@ -385,7 +386,8 @@ export function DesktopPortfolio() {
   const languageSwitchLabel = translate(
     locale === 'en' ? 'desktop.switchToPortuguese' : 'desktop.switchToEnglish',
   )
-  const scrollUrl = new URLSearchParams(window.location.search).get('focus') === 'systems' ? '?view=scroll&focus=systems' : '?view=scroll&focus=web'
+  const focus = useProjectFocus()
+  const scrollUrl = `?view=scroll&focus=${focus}`
   const languageSwitchText = locale === 'en' ? 'Português' : 'English'
   return (
     <div className="portfolio-shell relative h-dvh overflow-hidden" data-sky-phase={skyCycle.phase}>

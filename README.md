@@ -6,6 +6,7 @@ A KDE Plasma desktop portfolio with a Three.js wallpaper and direct project, con
 
 - 3D desktop as the main site, with web/backend and systems/desktop project groups
 - Application links: `/?focus=web#projects` and `/?focus=systems#projects`
+- Project categories switch in place, with shareable URLs and browser Back/Forward support
 - Optional scrolling view at `/?view=scroll`; `/?view=desktop` also opens the main desktop
 - Window controls for minimize, maximize, restore, and close
 - Tray behavior to focus/minimize apps

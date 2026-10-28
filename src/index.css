@@ -241,8 +241,8 @@ summary { cursor: pointer; }
 .project-intro { padding: 0 0 16px; }
 .project-intro > p:not(.desktop-shortcut-hint) { margin-top: 8px; font-size: .9rem; line-height: 1.6; }
 .project-focus-nav { margin-top: 12px; gap: 8px; }
-.project-focus-nav a { min-height: 44px; display: inline-flex; align-items: center; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: .8rem; }
-.project-focus-nav a[aria-current] { background: var(--action); color: var(--action-text); border-color: var(--action); }
+.project-focus-nav button { min-height: 44px; display: inline-flex; align-items: center; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: .8rem; }
+.project-focus-nav button[aria-pressed="true"] { background: var(--action); color: var(--action-text); border-color: var(--action); }
 .project-group > h3 { margin: 24px 0 0; font-size: 1rem; color: var(--muted); }
 .project-entry { padding: 22px 0; }
 .project-title { font-size: 1.65rem; }

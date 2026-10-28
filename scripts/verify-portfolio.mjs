@@ -10,6 +10,34 @@ const screenshots = process.env.SCREENSHOT_DIR
 const server = process.env.PORTFOLIO_URL ? null : spawn('npm', ['run', 'preview', '--', '--host', '127.0.0.1', '--port', '4187', '--strictPort'], { cwd: root, detached: true, stdio: ['ignore', 'pipe', 'pipe'] })
 let browser
 
+async function verifyProjectSwitching(page, gallery, locale) {
+  let documentRequests = 0
+  const trackNavigation = (request) => {
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame()) documentRequests += 1
+  }
+  page.on('request', trackNavigation)
+  const view = new URL(page.url()).searchParams.get('view')
+  const canvas = await page.$('.portfolio-shell canvas')
+  const window = page.getByRole('dialog', { name: locale === 'en' ? 'Projects' : 'Projetos', exact: true })
+  const position = await window.count() ? await window.boundingBox() : null
+  try {
+    await gallery.locator('.project-focus-nav').getByText(locale === 'en' ? 'Systems & desktop' : 'Sistemas e desktop', { exact: true }).click()
+    assert.equal(documentRequests, 0, 'Changing project category reloaded the whole page')
+    await page.waitForFunction(() => document.querySelector('.project-title')?.textContent === 'L.A.R.P.')
+    assert.equal(new URL(page.url()).searchParams.get('focus'), 'systems')
+    assert.equal(new URL(page.url()).searchParams.get('view'), view)
+    await page.goBack()
+    await page.waitForFunction(() => document.querySelector('.project-title')?.textContent === 'Chat Terminal')
+    await page.goForward()
+    await page.waitForFunction(() => document.querySelector('.project-title')?.textContent === 'L.A.R.P.')
+    assert.equal(documentRequests, 0, 'Project history navigation reloaded the page')
+    if (canvas) assert.equal(await canvas.evaluate((node) => node.isConnected), true, 'Changing category replaced the 3D canvas')
+    if (position) assert.deepEqual(await window.boundingBox(), position, 'Changing category moved or resized the window')
+  } finally {
+    page.off('request', trackNavigation)
+  }
+}
+
 try {
   if (server) await new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error('Preview server did not start')), 15000)
@@ -50,8 +78,7 @@ try {
       if (screenshots) await page.screenshot({ path: `${screenshots}/${locale}-${width}-scroll.png` })
       await viewProjects.click()
       assert.equal(new URL(page.url()).hash, '#projects')
-      await page.locator('.project-focus-nav').getByRole('link', { name: locale === 'en' ? 'Systems & desktop' : 'Sistemas e desktop', exact: true }).click()
-      await page.waitForURL('**/?focus=systems&view=scroll#projects')
+      await verifyProjectSwitching(page, page.locator('.project-gallery'), locale)
       await page.locator('.project-title').first().waitFor()
       await page.waitForFunction(() => {
         const top = document.getElementById('projects')?.getBoundingClientRect().top
@@ -88,6 +115,7 @@ try {
       const container = await projects.boundingBox()
       assert.ok(box && container && box.y + box.height <= container.y + container.height, 'First source link needs scrolling')
       assert.equal(await projects.locator('.project-title').first().innerText(), 'Chat Terminal')
+      await verifyProjectSwitching(page, projects.locator('.project-gallery'), locale)
       if (width > 900) {
         assert.equal(await page.locator('.desktop-help p').isVisible(), false)
         await page.locator('.desktop-help summary').click()
