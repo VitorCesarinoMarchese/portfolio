@@ -55,7 +55,7 @@ export const resources = {
       },
       projects: {
         heading: 'Projects',
-        description: 'A few projects that show how I approach frontend, backend, and interaction work.',
+        description: 'Recent work in Rust desktop apps, C++ networking, and full stack development.',
         demo: 'Live demo',
         source: 'Source code',
       },
@@ -78,8 +78,8 @@ export const resources = {
         download: 'Download CV',
       },
       skills: {
-        heading: 'Skills & Interests',
-        description: 'Technologies I work with and the problems I want to explore.',
+        heading: 'Skills snapshot',
+        description: 'Technologies used in my web, desktop, and networking projects, alongside tools from freelance work.',
       },
     },
   },
@@ -139,7 +139,7 @@ export const resources = {
       },
       projects: {
         heading: 'Projetos',
-        description: 'Alguns projetos que mostram como trabalho com frontend, backend e interfaces.',
+        description: 'Trabalhos recentes com aplicações desktop em Rust, redes em C++ e desenvolvimento full stack.',
         demo: 'Demonstração',
         source: 'Código-fonte',
       },
@@ -163,8 +163,8 @@ export const resources = {
         download: 'Baixar CV',
       },
       skills: {
-        heading: 'Habilidades e interesses',
-        description: 'Tecnologias com que trabalho e os problemas que quero explorar.',
+        heading: 'Resumo de habilidades',
+        description: 'Tecnologias dos meus projetos web, desktop e de redes, além de ferramentas usadas em trabalhos freelance.',
       },
     },
   },

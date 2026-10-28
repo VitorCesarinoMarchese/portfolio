@@ -12,6 +12,7 @@ export interface PortfolioProject {
   details: LocalizedText
   stack: string[]
   liveUrl?: string
+  liveLinkLabel?: LocalizedText
   repoUrl: string
 }
 
@@ -39,48 +40,92 @@ export interface ProfessionalExperience {
 
 export const profile = {
   name: 'Vitor Cesarino Marchese',
+  location: { en: 'São Paulo, Brazil', pt: 'São Paulo, Brasil' } satisfies LocalizedText,
+  website: 'https://www.vitorcesarinomarchese.site/',
   role: {
-    en: 'Software Engineer',
-    pt: 'Engenheiro de Software',
+    en: 'Full Stack Developer',
+    pt: 'Desenvolvedor Full Stack',
   } satisfies LocalizedText,
   bio: [
     {
-      en: "I'm Vitor Cesarino Marchese, a software engineer focused on backend development, performance, and systems.",
-      pt: 'Sou Vitor Cesarino Marchese, um engenheiro de software focado em desenvolvimento backend, desempenho e sistemas.',
+      en: 'I\'m a full stack developer based in São Paulo, a Software Engineering student at FIAP, and a Software Development Intern at Genova since July 2026. I build web applications, dashboards, and process automations with React, TypeScript, Supabase, n8n, and APIs.',
+      pt: 'Sou desenvolvedor full stack em São Paulo, estudante de Engenharia de Software na FIAP e estagiário em Desenvolvimento de Software na Genova desde julho de 2026. Desenvolvo aplicações web, dashboards e automações de processos com React, TypeScript, Supabase, n8n e APIs.',
     },
     {
-      en: "I like turning abstract ideas into working software and understanding what happens beneath the surface. I'm especially interested in low-latency systems, networking, real-time applications, and the kinds of problems where performance actually matters.",
-      pt: 'Gosto de transformar ideias abstratas em software que funciona e entender o que acontece por baixo dos panos. Tenho um interesse especial por sistemas de baixa latência, redes, aplicações em tempo real e problemas em que o desempenho realmente importa.',
+      en: 'My current projects include PlumCrate, a Sims 4 mod manager for Linux written in Rust, and L.A.R.P., an experimental C++ screen-streaming protocol. I also build web apps and APIs, including a Go terminal chat client with a TypeScript backend.',
+      pt: 'Meus projetos atuais incluem o PlumCrate, um gerenciador de mods do The Sims 4 para Linux escrito em Rust, e o L.A.R.P., um protocolo experimental de transmissão de tela em C++. Também desenvolvo aplicações web e APIs, incluindo um cliente de chat no terminal em Go com backend TypeScript.',
     },
     {
-      en: 'A large part of what I enjoy about engineering is investigation: profiling slow code, tracing unexpected behavior, debugging strange problems, and understanding a system well enough to make it better.',
-      pt: 'Uma boa parte do que me atrai na engenharia é a investigação: analisar o desempenho de código lento, rastrear comportamentos inesperados, depurar problemas estranhos e entender um sistema bem o suficiente para melhorá-lo.',
-    },
-    {
-      en: 'I mainly work with Go, TypeScript, React, C, and C++, and spend a lot of time around Linux. While I lean toward backend and systems work, I care just as much about how software feels to use. Good software should not only work—it should feel fast, deliberate, and well made.',
-      pt: 'Trabalho principalmente com Go, TypeScript, React, C e C++, e passo bastante tempo no Linux. Embora meu foco seja backend e sistemas, me importo igualmente com a experiência de usar o software. Um bom software deve funcionar e transmitir rapidez, cuidado e qualidade em cada interação.',
-    },
-    {
-      en: 'Long term, I want to work on technically demanding systems and develop a deep understanding of computers that lets me solve problems most engineers rarely encounter.',
-      pt: 'No longo prazo, quero trabalhar em sistemas tecnicamente exigentes e desenvolver um conhecimento profundo de computadores que me permita resolver problemas que a maioria dos engenheiros raramente encontra.',
+      en: 'Previously, I worked as a freelance frontend developer at Westpoint with React, Next.js, and Cypress. I\'m interested in full stack opportunities where I can build useful software and keep developing my knowledge of Linux, networking, and systems programming. I speak Portuguese and English.',
+      pt: 'Antes, trabalhei como desenvolvedor frontend freelancer na Westpoint com React, Next.js e Cypress. Busco oportunidades full stack para desenvolver software útil e aprofundar meus conhecimentos em Linux, redes e programação de sistemas. Falo português e inglês.',
     },
   ] satisfies LocalizedText[],
 }
 
 export const projects: PortfolioProject[] = [
   {
+    id: 'plumcrate',
+    title: { en: 'PlumCrate', pt: 'PlumCrate' },
+    description: {
+      en: 'An open-source Sims 4 mod manager for Linux, written in Rust. First alpha in development.',
+      pt: 'Gerenciador de mods do The Sims 4 para Linux, de código aberto e escrito em Rust. Primeira versão alfa em desenvolvimento.',
+    },
+    details: {
+      en: 'Browse a local mod library, import folders or ZIPs, enable and disable mods, and restore items from trash. CurseForge integration adds discovery, browser-assisted installation, and update checks. The AppImage updater verifies downloads and preserves the previous version for rollback.',
+      pt: 'Organize uma biblioteca local de mods, importe pastas ou ZIPs, ative e desative mods e restaure itens da lixeira. A integração com o CurseForge permite descobrir mods, instalar com auxílio do navegador e verificar atualizações. O atualizador do AppImage verifica os downloads e preserva a versão anterior para reversão.',
+    },
+    stack: ['Rust', 'egui', 'eframe', 'Linux', 'AppImage'],
+    liveUrl: 'https://plumcrate.vercel.app/',
+    liveLinkLabel: { en: 'Project website', pt: 'Site do projeto' },
+    repoUrl: 'https://github.com/VitorCesarinoMarchese/PlumCrate',
+  },
+  {
     id: 'larp',
     title: { en: 'L.A.R.P.', pt: 'L.A.R.P.' },
     description: {
-      en: 'A low-latency Linux screen-streaming prototype with adaptive bitrate over UDP.',
-      pt: 'Um protótipo de transmissão de tela no Linux com baixa latência e bitrate adaptativo via UDP.',
+      en: 'An experimental Linux screen-streaming protocol in C++23 with H.264 video over UDP.',
+      pt: 'Protocolo experimental de transmissão de tela no Linux em C++23, com vídeo H.264 sobre UDP.',
     },
     details: {
-      en: 'Low-latency Adaptive Remote Protocol captures the desktop with PipeWire, encodes H.264 with FFmpeg, and renders live video with SDL3. Receiver feedback adjusts bitrate, while authenticated encryption and session recovery support streaming over Tailscale.',
-      pt: 'Low-latency Adaptive Remote Protocol captura o desktop com PipeWire, codifica H.264 com FFmpeg e exibe vídeo ao vivo com SDL3. O feedback do receptor ajusta o bitrate, enquanto a criptografia autenticada e a recuperação de sessões permitem transmitir via Tailscale.',
+      en: 'PipeWire capture, FFmpeg encoding, and SDL3 playback connect through adaptive bitrate and receiver feedback. Authenticated sessions support recovery after network interruptions and process restarts. Verified between two Linux machines over Tailscale. Windows support is pending; NVIDIA acceleration is implemented but acceptance is blocked by driver leaks.',
+      pt: 'Captura com PipeWire, codificação com FFmpeg e reprodução com SDL3, com bitrate adaptativo e feedback do receptor. Sessões autenticadas permitem recuperar a transmissão após interrupções de rede e reinícios dos processos. Verificado entre duas máquinas Linux via Tailscale. O suporte ao Windows está pendente; a aceleração NVIDIA está implementada, mas sua validação está bloqueada por vazamentos no driver.',
     },
-    stack: ['C++23', 'UDP', 'PipeWire', 'FFmpeg', 'SDL3', 'libsodium', 'Tailscale'],
+    stack: ['C++23', 'UDP', 'FFmpeg', 'PipeWire', 'SDL3', 'libsodium'],
     repoUrl: 'https://github.com/VitorCesarinoMarchese/larp',
+  },
+  {
+    id: 'Exchange_of_Currencies',
+    title: {
+      en: 'Currency Exchange',
+      pt: 'Câmbio de moedas',
+    },
+    description: {
+      en: 'Currency exchange app with USD/GBP wallets, live rates, and transaction history.',
+      pt: 'App de câmbio com carteiras em USD/GBP, taxas em tempo real e histórico de transações.',
+    },
+    stack: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Node.js'],
+    details: {
+      en: 'Account registration and login connect each user to their wallets. Transaction history keeps past exchanges and balances available to review.',
+      pt: 'Cadastro e login conectam cada usuário às suas carteiras. O histórico permite consultar câmbios anteriores e saldos.',
+    },
+    repoUrl: 'https://github.com/VitorCesarinoMarchese/Exchange_of_Currencies',
+  },
+  {
+    id: 'chat-terminal',
+    title: {
+      en: 'Chat Terminal',
+      pt: 'Chat Terminal',
+    },
+    description: {
+      en: 'A terminal chat app with a Go interface and a TypeScript backend.',
+      pt: 'Uma aplicação de chat no terminal com interface em Go e backend em TypeScript.',
+    },
+    stack: ['Go', 'TypeScript', 'WebSockets', 'Prisma', 'PostgreSQL', 'SQLite'],
+    details: {
+      en: 'A Go terminal client connects to a TypeScript API. WebSockets deliver messages in real time, with authentication, friend requests, and persistent chat history.',
+      pt: 'Um cliente de terminal em Go se conecta a uma API TypeScript. WebSockets entregam mensagens em tempo real, com autenticação, pedidos de amizade e histórico persistente.',
+    },
+    repoUrl: 'https://github.com/VitorCesarinoMarchese/chat-terminal',
   },
   {
     id: 'portfolio',
@@ -99,23 +144,6 @@ export const projects: PortfolioProject[] = [
     },
     liveUrl: 'https://www.vitorcesarinomarchese.site/',
     repoUrl: 'https://github.com/VitorCesarinoMarchese/portfolio',
-  },
-  {
-    id: 'Exchange_of_Currencies',
-    title: {
-      en: 'Currency Exchange',
-      pt: 'Câmbio de moedas',
-    },
-    description: {
-      en: 'Currency exchange app with USD/GBP wallets, live rates, and transaction history.',
-      pt: 'App de câmbio com carteiras em USD/GBP, taxas em tempo real e histórico de transações.',
-    },
-    stack: ['Next', 'TypeScript', 'Tailwind', 'Node.js'],
-    details: {
-      en: 'Account registration and login connect each user to their wallets. Transaction history keeps past exchanges and balances available to review.',
-      pt: 'Cadastro e login conectam cada usuário às suas carteiras. O histórico permite consultar câmbios anteriores e saldos.',
-    },
-    repoUrl: 'https://github.com/VitorCesarinoMarchese/Exchange_of_Currencies',
   },
 ]
 
@@ -166,45 +194,44 @@ export const contacts: ContactLink[] = [
 
 export const skillGroups: SkillGroup[] = [
   {
-    id: 'backend',
-    title: { en: 'Backend', pt: 'Backend' },
-    items: ['Go', 'Node.js', 'Express', 'REST APIs', 'SQL', 'MongoDB'].map((item) => ({ en: item, pt: item })),
-  },
-  {
     id: 'frontend',
     title: {
       en: 'Frontend',
       pt: 'Frontend',
     },
-    items: ['TypeScript', 'React', 'Next.js', 'Tailwind CSS', 'HTML/CSS'].map((item) => ({ en: item, pt: item })),
+    items: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Mantine', 'HTML/CSS'].map((item) => ({ en: item, pt: item })),
+  },
+  {
+    id: 'backend',
+    title: {
+      en: 'Backend',
+      pt: 'Backend',
+    },
+    items: ['Node.js', 'Express', 'Go', 'REST APIs', 'WebSockets', 'JWT'].map((item) => ({ en: item, pt: item })),
+  },
+  {
+    id: 'data',
+    title: {
+      en: 'Data & automation',
+      pt: 'Dados e automação',
+    },
+    items: ['PostgreSQL', 'SQLite', 'MongoDB', 'Supabase', 'n8n'].map((item) => ({ en: item, pt: item })),
+  },
+  {
+    id: 'systems',
+    title: {
+      en: 'Systems & desktop',
+      pt: 'Sistemas e desktop',
+    },
+    items: ['C', 'C++23', 'Rust', 'UDP', 'FFmpeg', 'PipeWire', 'egui'].map((item) => ({ en: item, pt: item })),
   },
   {
     id: 'tooling',
     title: {
-      en: 'Systems & Tooling',
-      pt: 'Sistemas e ferramentas',
+      en: 'Tools & testing',
+      pt: 'Ferramentas e testes',
     },
-    items: ['Linux', 'Docker', 'Git', 'Vite'].map((item) => ({ en: item, pt: item })),
-  },
-  {
-    id: 'exploring',
-    title: { en: 'Exploring', pt: 'Explorando' },
-    items: [
-      { en: 'C', pt: 'C' },
-      { en: 'C++', pt: 'C++' },
-      { en: 'Systems programming', pt: 'Programação de sistemas' },
-    ],
-  },
-  {
-    id: 'interests',
-    title: { en: 'Technical Interests', pt: 'Interesses técnicos' },
-    items: [
-      { en: 'Performance profiling', pt: 'Análise de desempenho' },
-      { en: 'Low-latency systems', pt: 'Sistemas de baixa latência' },
-      { en: 'Networking', pt: 'Redes' },
-      { en: 'Real-time applications', pt: 'Aplicações em tempo real' },
-      { en: 'Observability & debugging', pt: 'Observabilidade e depuração' },
-    ],
+    items: ['Git', 'Linux', 'Docker', 'CMake', 'Cypress', 'Vitest', 'Figma'].map((item) => ({ en: item, pt: item })),
   },
 ]
 

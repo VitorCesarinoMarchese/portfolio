@@ -44,6 +44,7 @@ npm run dev
 npm run dev      # start development server
 npm run lint     # run eslint
 npm run build    # type-check and create production build
+npm run cv:build # regenerate the English and Portuguese CV PDFs
 npm run preview  # preview production build
 ```
 
@@ -67,3 +68,11 @@ CV files are served from:
 
 - `public/cv-en.pdf`
 - `public/cv-pt.pdf`
+
+### Update the CV
+
+Edit `src/data/cvContent.ts` for the summary, employment, selected project descriptions, education, and languages. The generator also reads contacts, project links, skills, and the role from `src/data/portfolioContent.ts`.
+
+Run `npm run cv:build` with Node.js 24 or later and Chromium installed. Set `CHROMIUM_PATH` if the browser executable is not named `chromium`. The command replaces both PDFs in `public/` without starting a server. Check both files for page breaks before publishing, and update `cvInfo.lastUpdated` when the content changes.
+
+The production build uses the checked-in PDFs and does not require Chromium. Sources for the current profile and project descriptions are recorded in [content sources](docs/content-sources.md).

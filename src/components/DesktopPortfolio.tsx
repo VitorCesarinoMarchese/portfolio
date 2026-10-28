@@ -197,7 +197,7 @@ function ProjectsView({ locale, translate }: AppViewProps) {
                 rel="noreferrer"
                 className="project-primary-link"
               >
-                {translate('projects.demo')}
+                {project.liveLinkLabel ? getLocalizedText(project.liveLinkLabel, locale) : translate('projects.demo')}
               </a>
             ) : null}
             <a
