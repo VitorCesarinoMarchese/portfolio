@@ -52,13 +52,13 @@ export const profile = {
     pt: 'Desenvolvedor de Software',
   } satisfies LocalizedText,
   intro: {
-    en: 'I build web applications at Genova and study Software Engineering at FIAP. Outside work, I develop Linux desktop tools and explore networking with Rust, Go, and C++.',
-    pt: 'Desenvolvo aplicações web na Genova e estudo Engenharia de Software na FIAP. Fora do trabalho, desenvolvo ferramentas desktop para Linux e exploro redes com Rust, Go e C++.',
+    en: 'I build recruitment tools and automations at Genova and study Software Engineering at FIAP. My personal projects focus on Linux desktop software and networking with Rust, Go, and C++.',
+    pt: 'Desenvolvo ferramentas de recrutamento e automações na Genova e estudo Engenharia de Software na FIAP. Meus projetos pessoais exploram software desktop para Linux e redes com Rust, Go e C++.',
   } satisfies LocalizedText,
   bio: [
     {
-      en: 'I\'m a software developer based in São Paulo, a Software Engineering student at FIAP, and a Software Development Intern at Genova since July 2026. I build web applications, dashboards, and process automations with React, TypeScript, Supabase, n8n, and APIs.',
-      pt: 'Sou desenvolvedor de software em São Paulo, estudante de Engenharia de Software na FIAP e estagiário em Desenvolvimento de Software na Genova desde julho de 2026. Desenvolvo aplicações web, dashboards e automações de processos com React, TypeScript, Supabase, n8n e APIs.',
+      en: 'I\'m a software developer based in São Paulo, a Software Engineering student at FIAP, and a Software Development Intern at Genova since July 2026. I build recruitment and internal operations tools with React, TypeScript, PostgreSQL, Supabase, and n8n, including WhatsApp communication and AI-assisted candidate screening.',
+      pt: 'Sou desenvolvedor de software em São Paulo, estudante de Engenharia de Software na FIAP e estagiário em Desenvolvimento de Software na Genova desde julho de 2026. Desenvolvo ferramentas de recrutamento e operações internas com React, TypeScript, PostgreSQL, Supabase e n8n, incluindo comunicação por WhatsApp e triagem de candidatos com IA.',
     },
     {
       en: 'My current projects include PlumCrate, a Sims 4 mod manager for Linux written in Rust, and L.A.R.P., an experimental C++ screen-streaming protocol. I also build web apps and APIs, including a Go terminal chat client with a TypeScript backend.',
