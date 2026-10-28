@@ -1,15 +1,15 @@
 # Developer portfolio
 
-A scrolling portfolio with direct project, contact, and CV links. An optional KDE Plasma desktop experience uses the same content. Built with React, TypeScript, Tailwind, and Three.js.
+A KDE Plasma desktop portfolio with a Three.js wallpaper and direct project, contact, and CV links. An optional scrolling view uses the same content. Built with React, TypeScript, Tailwind, and Three.js.
 
 ## Features
 
-- Scrolling default with web/backend and systems/desktop project groups
+- 3D desktop as the main site, with web/backend and systems/desktop project groups
 - Application links: `/?focus=web#projects` and `/?focus=systems#projects`
-- Optional desktop at `/?view=desktop`, with draggable app windows
+- Optional scrolling view at `/?view=scroll`; `/?view=desktop` also opens the main desktop
 - Window controls for minimize, maximize, restore, and close
 - Tray behavior to focus/minimize apps
-- Labeled mobile navigation in the optional desktop view
+- Labeled mobile navigation in the main desktop view
 - Three.js wallpaper loads only in the desktop experience
 - Real PlumCrate screenshots and source-linked L.A.R.P. test evidence
 - Bilingual content (English and Portuguese) with in-app language toggle

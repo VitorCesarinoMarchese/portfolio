@@ -385,7 +385,7 @@ export function DesktopPortfolio() {
   const languageSwitchLabel = translate(
     locale === 'en' ? 'desktop.switchToPortuguese' : 'desktop.switchToEnglish',
   )
-  const scrollUrl = new URLSearchParams(window.location.search).get('focus') === 'systems' ? '?focus=systems' : '?focus=web'
+  const scrollUrl = new URLSearchParams(window.location.search).get('focus') === 'systems' ? '?view=scroll&focus=systems' : '?view=scroll&focus=web'
   const languageSwitchText = locale === 'en' ? 'Português' : 'English'
   return (
     <div className="portfolio-shell relative h-dvh overflow-hidden" data-sky-phase={skyCycle.phase}>

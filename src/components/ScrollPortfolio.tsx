@@ -27,7 +27,7 @@ export function ScrollPortfolio() {
           <a href="#contact">{t('apps.contact.title')}</a>
         </nav>
         <div className="site-controls">
-          <a className="view-switch" href={`?view=desktop&focus=${focus}`}>{t('site.desktopView')}</a>
+          <a className="view-switch" href={`?focus=${focus}`}>{t('site.desktopView')}</a>
           <button type="button" aria-label={t(locale === 'en' ? 'desktop.switchToPortuguese' : 'desktop.switchToEnglish')} onClick={() => void i18n.changeLanguage(locale === 'en' ? 'pt' : 'en')}>{locale === 'en' ? 'Português' : 'English'}</button>
         </div>
       </header>
@@ -54,7 +54,7 @@ export function ScrollPortfolio() {
         <section id="skills" className="site-section" aria-label={t('apps.skills.title')}><SkillsView locale={locale} translate={translate} /></section>
         <section id="contact" className="site-section" aria-label={t('apps.contact.title')}><ContactView locale={locale} translate={translate} /><a className="project-secondary-link" href={getCvFileUrl(locale)} download>{t('cv.download')}</a></section>
       </main>
-      <footer className="site-footer"><span>{profile.name}</span><a href={`?view=desktop&focus=${focus}`}>{t('site.desktopView')}</a><a href="#top">{t('site.backToTop')}</a></footer>
+      <footer className="site-footer"><span>{profile.name}</span><a href={`?focus=${focus}`}>{t('site.desktopView')}</a><a href="#top">{t('site.backToTop')}</a></footer>
     </div>
   )
 }

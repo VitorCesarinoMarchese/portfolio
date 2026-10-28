@@ -14,7 +14,7 @@ function App() {
     document.querySelector('meta[name="description"]')?.setAttribute('content', getLocalizedText(profile.intro, locale))
   }, [locale])
 
-  return new URLSearchParams(window.location.search).get('view') === 'desktop'
+  return new URLSearchParams(window.location.search).get('view') !== 'scroll'
     ? <Suspense fallback={<p className="view-loading">{t('loading.message')}</p>}><DesktopPortfolio /></Suspense>
     : <ScrollPortfolio />
 }

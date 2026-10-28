@@ -32,7 +32,7 @@ try {
         await page.goto(new URL(path, base).href, { waitUntil: 'networkidle' })
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `Horizontal overflow at ${width}px: ${path}`)
       }
-      await go('/')
+      await go('/?view=scroll')
       await page.locator('.site-intro').waitFor()
       assert.equal(await page.locator('html').getAttribute('lang'), locale)
       const intro = page.locator('.site-intro')
@@ -51,7 +51,7 @@ try {
       await viewProjects.click()
       assert.equal(new URL(page.url()).hash, '#projects')
       await page.locator('.project-focus-nav').getByRole('link', { name: locale === 'en' ? 'Systems & desktop' : 'Sistemas e desktop', exact: true }).click()
-      await page.waitForURL('**/?focus=systems#projects')
+      await page.waitForURL('**/?focus=systems&view=scroll#projects')
       await page.locator('.project-title').first().waitFor()
       await page.waitForFunction(() => {
         const top = document.getElementById('projects')?.getBoundingClientRect().top
@@ -79,7 +79,8 @@ try {
     for (const width of [1440, 390]) {
       const context = await browser.newContext({ locale, viewport: { width, height: 1000 }, reducedMotion: 'reduce' })
       const page = await context.newPage()
-      await page.goto(new URL('/?view=desktop', base).href, { waitUntil: 'networkidle' })
+      await page.goto(new URL('/', base).href, { waitUntil: 'networkidle' })
+      await page.locator('.portfolio-shell canvas').waitFor({ state: 'visible' })
       await page.getByRole('button', { name: locale === 'en' ? 'View projects' : 'Ver projetos', exact: true }).click()
       const projects = width > 900 ? page.getByRole('dialog', { name: locale === 'en' ? 'Projects' : 'Projetos', exact: true }) : page.locator('#mobile-content')
       const source = projects.getByRole('link', { name: locale === 'en' ? 'Source code' : 'Código-fonte', exact: true }).first()
@@ -95,7 +96,11 @@ try {
       if (screenshots) await page.screenshot({ path: `${screenshots}/${locale}-${width}-desktop.png` })
       await page.getByRole('link', { name: locale === 'en' ? 'Scroll view' : 'Visão contínua', exact: true }).click()
       await page.locator('.scroll-portfolio').waitFor()
-      console.log(`PASS ${locale} ${width}px desktop experience: direct project action, visible source link, help, view switch`)
+      assert.equal(new URL(page.url()).searchParams.get('view'), 'scroll')
+      await page.locator('.site-header .view-switch').click()
+      await page.locator('.portfolio-shell canvas').waitFor({ state: 'visible' })
+      assert.equal(new URL(page.url()).searchParams.has('view'), false)
+      console.log(`PASS ${locale} ${width}px main 3D site: visible canvas, direct project action, source link, help, both view switches`)
       await context.close()
     }
   }

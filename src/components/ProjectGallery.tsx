@@ -8,7 +8,7 @@ const projectAreas: ProjectArea[] = ['web', 'systems']
 export function ProjectGallery({ locale, translate }: AppViewProps) {
   const focus = new URLSearchParams(window.location.search).get('focus') === 'systems' ? 'systems' : 'web'
   const areas: ProjectArea[] = focus === 'systems' ? ['systems', 'web'] : ['web', 'systems']
-  const view = new URLSearchParams(window.location.search).get('view') === 'desktop' ? '&view=desktop' : ''
+  const view = new URLSearchParams(window.location.search).get('view') === 'scroll' ? '&view=scroll' : ''
 
   return (
     <div className="project-gallery">
