@@ -8,7 +8,9 @@ export const cvContent = {
   } satisfies LocalizedText,
   experience: [
     {
+      id: 'genova',
       company: 'Genova',
+      stack: ['React', 'TypeScript', 'Supabase', 'n8n', 'REST APIs'],
       role: {
         en: 'Software Development Intern',
         pt: 'Estagiário em Desenvolvimento de Software',
@@ -30,7 +32,9 @@ export const cvContent = {
       ] satisfies LocalizedText[],
     },
     {
+      id: 'westpoint',
       company: 'Westpoint',
+      stack: ['React', 'Next.js', 'TypeScript', 'Mantine', 'Cypress', 'Figma'],
       role: {
         en: 'Freelance Frontend Developer',
         pt: 'Desenvolvedor Frontend Freelancer',

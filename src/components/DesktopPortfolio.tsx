@@ -13,7 +13,6 @@ import {
   Clock,
   FilePdf,
   Folders,
-  Lightbulb,
   Pause,
   Play,
   Stack,
@@ -23,16 +22,11 @@ import {
 } from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 import {
-  contacts,
-  cvInfo,
-  getCvFileUrl,
   getLocalizedText,
   profile,
-  professionalExperience,
-  projects,
-  skillGroups,
   type LocaleCode,
 } from '../data/portfolioContent.ts'
+import { AboutView, ContactView, CvView, ExperienceView, ProjectsView, SkillsView, type AppViewProps } from './PortfolioViews.tsx'
 import { AppWindow, type WindowPosition } from './AppWindow.tsx'
 import { WallpaperBoundary } from './WallpaperBoundary.tsx'
 
@@ -87,14 +81,14 @@ const getSkyCycle = (date: Date): { phase: CelestialPhase; progress: number } =>
 
 const createInitialWindowState = (): WindowStateMap => ({
   projects: {
-    mode: 'closed',
+    mode: window.location.hash === '#projects' ? 'open' : 'closed',
     position: { ...INITIAL_WINDOW_POSITIONS.projects },
     zIndex: 31,
     isMaximized: false,
     restorePosition: null,
   },
   about: {
-    mode: 'open',
+    mode: window.location.hash === '#projects' ? 'closed' : 'open',
     position: { ...INITIAL_WINDOW_POSITIONS.about },
     zIndex: 32,
     isMaximized: false,
@@ -163,225 +157,17 @@ function AppIcon({
   }
 }
 
-interface AppViewProps {
-  locale: LocaleCode
-  translate: (key: string) => string
-}
-
-function ProjectsView({ locale, translate }: AppViewProps) {
-  return (
-    <div className="space-y-4">
-      <header className="project-intro">
-        <h3>{translate('projects.heading')}</h3>
-        <p>{translate('projects.description')}</p>
-        <p className="desktop-shortcut-hint"><Lightbulb size={18} aria-hidden />{translate('desktop.shortcuts')}</p>
-      </header>
-      {projects.map((project) => (
-        <article
-          key={project.id}
-          className="project-entry"
-        >
-          <div className="project-copy">
-            <h4 className="project-title">{getLocalizedText(project.title, locale)}</h4>
-            <p className="project-summary">{getLocalizedText(project.description, locale)}</p>
-            <p className="project-detail">{getLocalizedText(project.details, locale)}</p>
-            <ul className="project-stack">
-              {project.stack.map((item) => <li key={item}>{item}</li>)}
-            </ul>
-
-            <div className="project-actions">
-            {project.liveUrl ? (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="project-primary-link"
-              >
-                {project.liveLinkLabel ? getLocalizedText(project.liveLinkLabel, locale) : translate('projects.demo')}
-              </a>
-            ) : null}
-            <a
-              href={project.repoUrl}
-              target="_blank"
-              rel="noreferrer"
-              className={project.liveUrl ? "project-secondary-link" : "project-primary-link"}
-            >
-              {translate('projects.source')}
-            </a>
-            </div>
-          </div>
-        </article>
-      ))}
-    </div>
-  )
-}
-
-function AboutView({ locale, translate }: AppViewProps) {
-  return (
-    <section className="space-y-4">
-      <h3 className="text-xl text-slate-100">{translate('about.heading')}</h3>
-      <p className="text-sm uppercase tracking-[0.2em] text-sky-200/90">
-        {profile.name} - {getLocalizedText(profile.role, locale)}
-      </p>
-      {profile.bio.map((paragraph, index) => (
-        <p key={index} className="leading-relaxed text-slate-300">
-          {getLocalizedText(paragraph, locale)}
-        </p>
-      ))}
-    </section>
-  )
-}
-
-function ExperienceView({ locale, translate }: AppViewProps) {
-  return (
-      <section className="experience-view" aria-labelledby="experience-heading">
-        <h3 id="experience-heading">{translate('experience.heading')}</h3>
-        {professionalExperience.map((experience) => (
-          <article className="experience-entry" key={experience.id}>
-            <h4>{getLocalizedText(experience.role, locale)}</h4>
-            <p className="experience-meta">
-              <span>{experience.company}</span>
-              <span>{getLocalizedText(experience.period, locale)}</span>
-            </p>
-            <ul className="experience-highlights">
-              {experience.highlights.map((highlight) => (
-                <li key={highlight.en}>{getLocalizedText(highlight, locale)}</li>
-              ))}
-            </ul>
-            <ul className="project-stack">
-              {experience.stack.map((technology) => <li key={technology}>{technology}</li>)}
-            </ul>
-          </article>
-        ))}
-      </section>
-  )
-}
-
-function ContactView({ translate }: AppViewProps) {
-  return (
-    <section className="space-y-4">
-      <h3 className="text-xl text-slate-100">{translate('contact.heading')}</h3>
-      <p className="text-sm text-slate-300">{translate('contact.description')}</p>
-
-      <ul className="space-y-3">
-        {contacts.map((contact, index) => {
-          const isExternal = contact.href.startsWith('http')
-
-          return (
-            <li key={contact.id}>
-              <a
-                href={contact.href}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noreferrer' : undefined}
-                className="flex flex-wrap items-center justify-between gap-2 break-all rounded-xl border border-slate-300/20 bg-slate-900/45 px-4 py-3 transition hover:border-sky-300/50 hover:bg-slate-900/75"
-              >
-                <span className="flex flex-wrap items-center gap-2 text-sm tracking-wide text-slate-300">
-                  <span>{contact.label}</span>
-                  {index === 0 ? <span className="contact-preferred">{translate('contact.preferred')}</span> : null}
-                </span>
-                <span className="text-sm text-slate-100">{contact.value}</span>
-              </a>
-            </li>
-          )
-        })}
-      </ul>
-    </section>
-  )
-}
-
-function CvView({ locale, translate }: AppViewProps) {
-  const [cvFileUrl, setCvFileUrl] = useState(() => getCvFileUrl(locale))
-  const [previewFailed, setPreviewFailed] = useState(false)
-
-  useEffect(() => {
-    let isActive = true
-    const preferredCvUrl = getCvFileUrl(locale)
-    const fallbackCvUrl = getCvFileUrl('en')
-    const controller = new AbortController()
-
-    const verifyLocalizedCv = async () => {
-      if (preferredCvUrl === fallbackCvUrl) {
-        if (isActive) {
-          setCvFileUrl(fallbackCvUrl)
-        }
-        return
-      }
-
-      try {
-        const response = await fetch(preferredCvUrl, {
-          method: 'HEAD',
-          signal: controller.signal,
-        })
-
-        if (isActive) {
-          setCvFileUrl(response.ok ? preferredCvUrl : fallbackCvUrl)
-        }
-      } catch {
-        if (isActive) {
-          setCvFileUrl(fallbackCvUrl)
-        }
-      }
-    }
-
-    void verifyLocalizedCv()
-
-    return () => {
-      isActive = false
-      controller.abort()
-    }
-  }, [locale])
-
-  return (
-    <section className="cv-content flex min-h-[24rem] flex-col gap-3">
-      <p className="text-sm text-slate-300">{translate('cv.previewFallback')}</p>
-      {previewFailed ? <p role="status" className="cv-preview-error">{translate('cv.previewError')}</p> : null}
-      <p className="text-sm text-slate-300">{translate('cv.updatedLabel')}: {new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${cvInfo.lastUpdated}-01T00:00:00Z`))}</p>
-      <a className="project-primary-link self-start" href={cvFileUrl} target="_blank" rel="noreferrer" download>{translate('cv.download')}</a>
-      <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-300/25 bg-slate-950/85">
-        <iframe
-          title={translate('cv.previewTitle')}
-          src={cvFileUrl}
-          className="h-[28rem] w-full"
-          loading="lazy"
-          onError={() => setPreviewFailed(true)}
-          onLoad={() => setPreviewFailed(false)}
-        />
-      </div>
-
-    </section>
-  )
-}
-
-function SkillsView({ locale, translate }: AppViewProps) {
-  return (
-    <section className="space-y-4">
-      <h3 className="text-xl text-slate-100">{translate('skills.heading')}</h3>
-      <p className="text-sm text-slate-300">{translate('skills.description')}</p>
-
-      <div className="space-y-4">
-        {skillGroups.map((group) => (
-          <article key={group.id} className="skill-group">
-            <h4>
-              {getLocalizedText(group.title, locale)}
-            </h4>
-            <p>{group.items.map((item) => getLocalizedText(item, locale)).join(' · ')}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 function AppContent({
   appId,
   locale,
   translate,
+  onNavigate,
 }: { appId: DesktopAppId } & AppViewProps) {
   switch (appId) {
     case 'projects':
       return <ProjectsView locale={locale} translate={translate} />
     case 'about':
-      return <AboutView locale={locale} translate={translate} />
+      return <AboutView locale={locale} translate={translate} onNavigate={onNavigate} />
     case 'experience':
       return <ExperienceView locale={locale} translate={translate} />
     case 'contact':
@@ -397,7 +183,7 @@ export function DesktopPortfolio() {
   const { t, i18n } = useTranslation()
 
   const [windowState, setWindowState] = useState<WindowStateMap>(createInitialWindowState)
-  const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>('about')
+  const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>(() => window.location.hash === '#projects' ? 'projects' : 'about')
   const [isMobile, setIsMobile] = useState(getInitialIsMobile)
   const [skyCycle, setSkyCycle] = useState(() => getSkyCycle(new Date()))
   const [clockLabel, setClockLabel] = useState(() => formatClock(new Date()))
@@ -599,6 +385,7 @@ export function DesktopPortfolio() {
   const languageSwitchLabel = translate(
     locale === 'en' ? 'desktop.switchToPortuguese' : 'desktop.switchToEnglish',
   )
+  const scrollUrl = new URLSearchParams(window.location.search).get('focus') === 'systems' ? '?focus=systems' : '?focus=web'
   const languageSwitchText = locale === 'en' ? 'Português' : 'English'
   return (
     <div className="portfolio-shell relative h-dvh overflow-hidden" data-sky-phase={skyCycle.phase}>
@@ -629,12 +416,13 @@ export function DesktopPortfolio() {
             <header className="mobile-header">
               <div><h1>{profile.name}</h1><span>{getLocalizedText(profile.role, locale)}</span></div>
               <div className="mobile-utilities">
+                <a className="view-switch" href={scrollUrl}>{translate('site.scrollView')}</a>
                 <button type="button" onClick={toggleLanguage} aria-label={languageSwitchLabel} title={languageSwitchLabel}>{languageSwitchText}</button>
               </div>
             </header>
             <section key={activeMobileTab} className="mobile-content" id="mobile-content" aria-label={translate(`apps.${activeMobileTab}.title`)}>
               <h2 className="mobile-section-title">{translate(`apps.${activeMobileTab}.title`)}</h2>
-              <AppContent key={activeMobileTab} appId={activeMobileTab} locale={locale} translate={translate} />
+              <AppContent key={activeMobileTab} appId={activeMobileTab} locale={locale} translate={translate} onNavigate={setActiveMobileTab} />
             </section>
             <nav className="mobile-dock" aria-label={translate('panel.dock')}>
               {APP_DEFINITIONS.map((app, index) => (
@@ -657,6 +445,8 @@ export function DesktopPortfolio() {
               </div>
 
               <div className="desktop-utilities flex items-center gap-2 md:gap-3">
+                <a className="utility-control" href={scrollUrl}>{translate('site.scrollView')}</a>
+                <details className="desktop-help"><summary>{translate('site.help')}</summary><p>{translate('desktop.shortcuts')}</p></details>
                 <button type="button" className="utility-control" aria-pressed={isWallpaperAnimated}
                   onClick={() => setIsWallpaperAnimated((current) => !current)}>
                   {isWallpaperAnimated ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}
@@ -705,7 +495,7 @@ export function DesktopPortfolio() {
                   onToggleMaximize={() => toggleDesktopMaximize(app.id)}
                   onMove={(position) => moveDesktopApp(app.id, position)}
                 >
-                  <AppContent appId={app.id} locale={locale} translate={translate} />
+                  <AppContent appId={app.id} locale={locale} translate={translate} onNavigate={focusDesktopApp} />
                 </AppWindow>
               )
             })}

@@ -1,3 +1,5 @@
+import { cvContent } from './cvContent.ts'
+
 export type LocaleCode = 'en' | 'pt'
 
 export interface LocalizedText {
@@ -5,7 +7,10 @@ export interface LocalizedText {
   pt: string
 }
 
+export type ProjectArea = 'web' | 'systems'
+
 export interface PortfolioProject {
+  area: ProjectArea
   id: string
   title: LocalizedText
   description: LocalizedText
@@ -43,13 +48,17 @@ export const profile = {
   location: { en: 'São Paulo, Brazil', pt: 'São Paulo, Brasil' } satisfies LocalizedText,
   website: 'https://www.vitorcesarinomarchese.site/',
   role: {
-    en: 'Full Stack Developer',
-    pt: 'Desenvolvedor Full Stack',
+    en: 'Software Developer',
+    pt: 'Desenvolvedor de Software',
+  } satisfies LocalizedText,
+  intro: {
+    en: 'I build web applications at Genova and study Software Engineering at FIAP. Outside work, I develop Linux desktop tools and explore networking with Rust, Go, and C++.',
+    pt: 'Desenvolvo aplicações web na Genova e estudo Engenharia de Software na FIAP. Fora do trabalho, desenvolvo ferramentas desktop para Linux e exploro redes com Rust, Go e C++.',
   } satisfies LocalizedText,
   bio: [
     {
-      en: 'I\'m a full stack developer based in São Paulo, a Software Engineering student at FIAP, and a Software Development Intern at Genova since July 2026. I build web applications, dashboards, and process automations with React, TypeScript, Supabase, n8n, and APIs.',
-      pt: 'Sou desenvolvedor full stack em São Paulo, estudante de Engenharia de Software na FIAP e estagiário em Desenvolvimento de Software na Genova desde julho de 2026. Desenvolvo aplicações web, dashboards e automações de processos com React, TypeScript, Supabase, n8n e APIs.',
+      en: 'I\'m a software developer based in São Paulo, a Software Engineering student at FIAP, and a Software Development Intern at Genova since July 2026. I build web applications, dashboards, and process automations with React, TypeScript, Supabase, n8n, and APIs.',
+      pt: 'Sou desenvolvedor de software em São Paulo, estudante de Engenharia de Software na FIAP e estagiário em Desenvolvimento de Software na Genova desde julho de 2026. Desenvolvo aplicações web, dashboards e automações de processos com React, TypeScript, Supabase, n8n e APIs.',
     },
     {
       en: 'My current projects include PlumCrate, a Sims 4 mod manager for Linux written in Rust, and L.A.R.P., an experimental C++ screen-streaming protocol. I also build web apps and APIs, including a Go terminal chat client with a TypeScript backend.',
@@ -65,6 +74,7 @@ export const profile = {
 export const projects: PortfolioProject[] = [
   {
     id: 'plumcrate',
+    area: 'systems',
     title: { en: 'PlumCrate', pt: 'PlumCrate' },
     description: {
       en: 'An open-source Sims 4 mod manager for Linux, written in Rust. First alpha in development.',
@@ -81,6 +91,7 @@ export const projects: PortfolioProject[] = [
   },
   {
     id: 'larp',
+    area: 'systems',
     title: { en: 'L.A.R.P.', pt: 'L.A.R.P.' },
     description: {
       en: 'An experimental Linux screen-streaming protocol in C++23 with H.264 video over UDP.',
@@ -95,6 +106,7 @@ export const projects: PortfolioProject[] = [
   },
   {
     id: 'Exchange_of_Currencies',
+    area: 'web',
     title: {
       en: 'Currency Exchange',
       pt: 'Câmbio de moedas',
@@ -112,13 +124,14 @@ export const projects: PortfolioProject[] = [
   },
   {
     id: 'chat-terminal',
+    area: 'web',
     title: {
       en: 'Chat Terminal',
       pt: 'Chat Terminal',
     },
     description: {
-      en: 'A terminal chat app with a Go interface and a TypeScript backend.',
-      pt: 'Uma aplicação de chat no terminal com interface em Go e backend em TypeScript.',
+      en: 'A Go terminal chat client backed by a TypeScript API, JWT authentication, and persistent WebSocket messaging.',
+      pt: 'Cliente de chat no terminal em Go, com API TypeScript, autenticação JWT e mensagens persistentes via WebSocket.',
     },
     stack: ['Go', 'TypeScript', 'WebSockets', 'Prisma', 'PostgreSQL', 'SQLite'],
     details: {
@@ -129,6 +142,7 @@ export const projects: PortfolioProject[] = [
   },
   {
     id: 'portfolio',
+    area: 'web',
     title: {
       en: 'Portfolio',
       pt: 'Portfólio',
@@ -147,29 +161,9 @@ export const projects: PortfolioProject[] = [
   },
 ]
 
-export const professionalExperience: ProfessionalExperience[] = [
-  {
-    id: 'genova-ai',
-    company: 'Genova AI for Business',
-    role: { en: 'Intern', pt: 'Estagiário' },
-    period: { en: 'July 2026 to present', pt: 'Julho de 2026 até o momento' },
-    highlights: [
-      {
-        en: 'I develop systems and automate processes, building web applications, integrations, and dashboards to support teams. I work to understand operational needs and build solutions that reduce manual tasks and make information easier to access.',
-        pt: 'Trabalho com desenvolvimento de sistemas e automação de processos, criando aplicações web, integrações e dashboards para apoiar o trabalho das equipes. Minha atuação envolve entender as necessidades da operação e desenvolver soluções que reduzam tarefas manuais e facilitem o acesso às informações.',
-      },
-      {
-        en: 'I use React, TypeScript, Supabase, and n8n, as well as APIs and AI tools. I work on interfaces, databases, and business logic, both developing features and maintaining and improving systems.',
-        pt: 'Utilizo React, TypeScript, Supabase e n8n, além de APIs e recursos de inteligência artificial. Trabalho nas interfaces, no banco de dados e nas regras de negócio, tanto na criação de funcionalidades quanto na manutenção e melhoria dos sistemas.',
-      },
-      {
-        en: 'I also handle performance, access control, and fixes for problems encountered while using the applications.',
-        pt: 'Também cuido de desempenho, controle de acesso e correção de problemas no uso das aplicações.',
-      },
-    ],
-    stack: ['React', 'TypeScript', 'Supabase', 'n8n', 'APIs'],
-  },
-]
+export const professionalExperience: ProfessionalExperience[] = cvContent.experience.map(
+  ({ bullets, ...experience }) => ({ ...experience, highlights: bullets }),
+)
 
 export const contacts: ContactLink[] = [
   {

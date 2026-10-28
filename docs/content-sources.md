@@ -18,3 +18,10 @@ Reviewed on October 28, 2026. The profile and CV target full stack roles with Li
 - [Currency Exchange README](https://github.com/VitorCesarinoMarchese/Exchange_of_Currencies#readme) and its frontend manifest confirm the existing project description and Next.js stack.
 
 Private thread context was used to understand the work, then checked against the public repositories. Internal thread links, machine addresses, and local environment details are not included in portfolio copy or CVs.
+
+## Evidence shown on the site
+
+- L.A.R.P.'s [two-machine rendering report](https://github.com/VitorCesarinoMarchese/larp/blob/677b7d9076984d7d3f95266290883fd9cee6fc6d/docs/rendering.md#two-machine-tailscale-acceptance-on-2026-10-03) records 900 presented frames at a 30 FPS sender target, with mean decode time 2,571 microseconds and mean presentation-call time 7,585 microseconds. These are recorded test results from October 3, 2026, not new portfolio-session measurements. The site distinguishes call timing from end-to-end latency and discloses losses in sanitizer runs.
+- The separate adaptive and session reports supply the controlled-loss and recovery descriptions. The architecture diagram describes the actual capture/codec/transport/display path; it is not a screenshot. No recorded demo, CPU utilization, or end-to-end latency claim was added.
+- PlumCrate's library and settings PNGs are copied unchanged from commit `2986334ebef2a471534f62c7f38f48254d8e1f60`. Their source and third-party cover-art credits are linked in the screenshot caption. Installation and safety descriptions come from that revision's development and AppImage-update guides. The first alpha remained unpublished at review time.
+- Specific Genova delivery claims require source evidence. Retain only the employment claims supported by the CV until those details can be verified.

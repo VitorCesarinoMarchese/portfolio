@@ -1,6 +1,12 @@
 export const resources = {
   en: {
     translation: {
+      site: {
+        viewProjects: 'View projects', skipToProjects: 'Skip to projects', navigation: 'Main navigation',
+        desktopView: 'Desktop experience', scrollView: 'Scroll view', moreAbout: 'More about me', backToTop: 'Back to top',
+        projectFocus: 'Project order', webWork: 'Web & backend', systemsWork: 'Systems & desktop',
+        projectDetails: 'Project details', help: 'Help',
+      },
       desktop: {
         environment: 'The desktop portfolio',
         language: 'Language',
@@ -55,7 +61,7 @@ export const resources = {
       },
       projects: {
         heading: 'Projects',
-        description: 'Recent work in Rust desktop apps, C++ networking, and full stack development.',
+        description: 'Web applications, APIs, Linux desktop tools, and networking. Choose which area to see first.',
         demo: 'Live demo',
         source: 'Source code',
       },
@@ -85,6 +91,12 @@ export const resources = {
   },
   pt: {
     translation: {
+      site: {
+        viewProjects: 'Ver projetos', skipToProjects: 'Pular para projetos', navigation: 'Navegação principal',
+        desktopView: 'Experiência desktop', scrollView: 'Visão contínua', moreAbout: 'Mais sobre mim', backToTop: 'Voltar ao topo',
+        projectFocus: 'Ordem dos projetos', webWork: 'Web e backend', systemsWork: 'Sistemas e desktop',
+        projectDetails: 'Detalhes do projeto', help: 'Ajuda',
+      },
       desktop: {
         environment: 'O portfólio desktop',
         language: 'Idioma',
@@ -139,7 +151,7 @@ export const resources = {
       },
       projects: {
         heading: 'Projetos',
-        description: 'Trabalhos recentes com aplicações desktop em Rust, redes em C++ e desenvolvimento full stack.',
+        description: 'Aplicações web, APIs, ferramentas desktop para Linux e redes. Escolha qual área ver primeiro.',
         demo: 'Demonstração',
         source: 'Código-fonte',
       },

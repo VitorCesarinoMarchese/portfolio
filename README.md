@@ -1,14 +1,17 @@
-# KDE Plasma Portfolio
+# Developer portfolio
 
-Interactive portfolio inspired by the KDE Plasma desktop environment, built with React, TypeScript, Tailwind, and Three.js.
+A scrolling portfolio with direct project, contact, and CV links. An optional KDE Plasma desktop experience uses the same content. Built with React, TypeScript, Tailwind, and Three.js.
 
 ## Features
 
-- KDE-style desktop interface with draggable app windows
+- Scrolling default with web/backend and systems/desktop project groups
+- Application links: `/?focus=web#projects` and `/?focus=systems#projects`
+- Optional desktop at `/?view=desktop`, with draggable app windows
 - Window controls for minimize, maximize, restore, and close
 - Tray behavior to focus/minimize apps
-- Android-inspired mobile mode with swipeable app pages and bottom dock
-- Three.js wallpaper scene with full-screen loading gate and fallback flow
+- Labeled mobile navigation in the optional desktop view
+- Three.js wallpaper loads only in the desktop experience
+- Real PlumCrate screenshots and source-linked L.A.R.P. test evidence
 - Bilingual content (English and Portuguese) with in-app language toggle
 - CV app with inline preview plus localized files (`cv-en.pdf` and `cv-pt.pdf`)
 - Projects app where `liveUrl` is optional (projects without demo only show source link)
@@ -17,6 +20,7 @@ Interactive portfolio inspired by the KDE Plasma desktop environment, built with
 
 - Projects
 - About
+- Experience
 - Skills
 - Contact
 - CV
@@ -45,6 +49,7 @@ npm run dev      # start development server
 npm run lint     # run eslint
 npm run build    # type-check and create production build
 npm run cv:build # regenerate the English and Portuguese CV PDFs
+npm run verify   # exercise both layouts, languages, project evidence, and CV links
 npm run preview  # preview production build
 ```
 
@@ -76,3 +81,11 @@ Edit `src/data/cvContent.ts` for the summary, employment, selected project descr
 Run `npm run cv:build` with Node.js 24 or later and Chromium installed. Set `CHROMIUM_PATH` if the browser executable is not named `chromium`. The command replaces both PDFs in `public/` without starting a server. Check both files for page breaks before publishing, and update `cvInfo.lastUpdated` when the content changes.
 
 The production build uses the checked-in PDFs and does not require Chromium. Sources for the current profile and project descriptions are recorded in [content sources](docs/content-sources.md).
+
+Employment is edited once in `src/data/cvContent.ts`. Both Experience views and the CV generator read those entries.
+
+### Verify the interface
+
+Run `npm run build`, then `npx playwright install chromium` and `npm run verify`. Alternatively, use an existing browser with `CHROMIUM_PATH=/usr/bin/chromium npm run verify`.
+
+The verifier starts and stops a local production preview. Set `PORTFOLIO_URL` to check a deployed site instead. Set `SCREENSHOT_DIR` to save screenshots outside the repository. It checks the scrolling and desktop views in both languages, widths down to 320 px, immediate contact/CV actions, project ordering, screenshot loading, experience, and matching PDF downloads.
